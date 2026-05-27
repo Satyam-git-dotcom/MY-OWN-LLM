@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Vectorial Resonance — Modern Minimalist AI Playground</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome & Vis.js Network -->
+  <script src="https://kit.fontawesome.com/4fe13466d5.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  
+  <link rel="stylesheet" href="styles.css?v=18">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ══ LEFT SIDEBAR (PERMANENTLY VISIBLE) ══ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <img src="vector_brand_logo.png" class="logo-img" alt="Synapse Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px;" />
+          <div class="logo-text-block">
+            <h1>SYNAPSE</h1>
+            <span class="logo-subtitle">NEURAL VECTOR ENGINE</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-content">
+        <!-- Telemetry Stats Section -->
+        <div class="sidebar-section">
+          <span class="sec-title">Database Telemetry</span>
+          <div class="stats-label" id="statsLabel">0 vectors · 16 dims</div>
+        </div>
+
+        <!-- Search Mode / Algorithm Select Section -->
+        <div class="sidebar-section">
+          <span class="sec-title">Search Mode</span>
+          <div class="algo-pill-container">
+            <button class="algo-pill-btn active" id="btnIndexHnsw" data-algo="hnsw" onclick="setAlgo(this)">HNSW</button>
+            <button class="algo-pill-btn" id="btnIndexKdt" data-algo="kdtree" onclick="setAlgo(this)">KD-Tree</button>
+            <button class="algo-pill-btn" id="btnIndexBf" data-algo="bruteforce" onclick="setAlgo(this)">Brute Force</button>
+          </div>
+        </div>
+
+        <!-- Distance Metric Section -->
+        <div class="sidebar-section">
+          <span class="sec-title">Distance Metric</span>
+          <div class="select-container">
+            <select id="metric" onchange="onMetricChange()">
+              <option value="cosine">Cosine Similarity</option>
+              <option value="euclidean">Euclidean Distance</option>
+              <option value="manhattan">Manhattan Distance</option>
+              <option value="chebyshev">Chebyshev Distance</option>
+              <option value="hamming">Hamming Distance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permanent Ollama Diagnostics Status -->
+      <div class="sidebar-footer">
+        <div class="ollama-status-card" id="ollamaStatusCard">
+          <div class="status-header">
+            <span class="status-indicator"></span>
+            <h3>Ollama Status</h3>
+            <span id="ollamaBadge" class="status-badge">Offline</span>
+          </div>
+          <p class="status-details">Checking Ollama connection...</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══ MAIN INTERACTIVE PLAYGROUND (RIGHT PANEL) ══ -->
+    <main class="main-panel">
+      
+      <!-- Top Navigation Text-Based Bar -->
+      <nav class="top-nav">
+        <button class="tab-btn active" id="tabBtn-rag" onclick="switchTab('rag')">
+          <img src="chatbot_icon.png" class="tab-icon" alt="Chat" /> AI Chatbot
+        </button>
+        <button class="tab-btn" id="tabBtn-visualizer" onclick="switchTab('visualizer')">
+          <img src="visualizer_icon.png" class="tab-icon" alt="Visualizer" /> Vector Visualizer
+        </button>
+        <button class="tab-btn" id="tabBtn-docs" onclick="switchTab('docs')">
+          <img src="documents_icon.png" class="tab-icon" alt="Documents" /> Knowledge Documents
+        </button>
+        
+        <!-- Elegant Monochromatic Theme Toggle -->
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark Mode">
+          <img src="theme_icon.png" class="btn-icon" alt="Theme" style="margin-right: 6px;" />Theme
+        </button>
+      </nav>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content-container">
+        
+        <!-- ── TAB 1: RAG CHATBOT ── -->
+        <div class="tab-content active" id="tab-rag">
+          <div class="chat-container">
+            <div class="chat-thread" id="chatHistory">
+              <div class="chat-welcome-screen">
+                <div class="welcome-avatar">
+                  <img src="robot_icon.png" class="welcome-avatar-img" alt="Robot Icon" />
+                </div>
+                <h2>Local Knowledge Chat</h2>
+                <p>Ask questions about your indexed documents. Context chunks will be retrieved semantic-first using HNSW vectors and summarized by Llama 3.2 locally.</p>
+              </div>
+            </div>
+
+            <!-- Chat Bottom Input Area -->
+            <div class="chat-input-wrapper">
+              <div class="chat-input-bar">
+                <textarea id="ragQuestion" placeholder="Ask a question about your documents... (Press Enter to send, Shift + Enter for new line)" rows="1" oninput="autoExpandTextarea(this)"></textarea>
+                <div class="chat-input-controls">
+                  <div class="select-container compact">
+                    <select id="ragK">
+                      <option value="2">Top-2 Chunks</option>
+                      <option value="3" selected>Top-3 Chunks</option>
+                      <option value="5">Top-5 Chunks</option>
+                    </select>
+                  </div>
+                  <button class="btn-chat-send" id="askBtn" onclick="askAI()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="chat-footer-msg">Your OWN AI · Monochromatic Minimal Gallery Theme · Local Ollama Integration</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── TAB 2: VECTOR VISUALIZER (SIDE-BY-SIDE GRID) ── -->
+        <div class="tab-content" id="tab-visualizer">
+          <div class="visualizer-grid">
+            
+            <!-- Left Side: Controls & Sliders Panel -->
+            <aside class="visualizer-sidebar">
+              
+              <!-- System Parameters -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">System Parameters</span>
+                
+                <div class="control-group">
+                  <div class="slider-header">
+                    <label class="control-label">Similarity Threshold</label>
+                    <span class="slider-val" id="thresholdLabel">0.35</span>
+                  </div>
+                  <input type="range" id="thresholdSlider" min="0.05" max="1" step="0.05" value="0.35" oninput="document.getElementById('thresholdLabel').textContent=this.value; updateParticleBounds()">
+                </div>
+
+                <div class="control-group">
+                  <div class="slider-header">
+                    <label class="control-label">Cluster Density</label>
+                    <span class="slider-val" id="densityLabel">0.60</span>
+                  </div>
+                  <input type="range" id="densitySlider" min="0.1" max="1.5" step="0.05" value="0.60" oninput="document.getElementById('densityLabel').textContent=this.value; reprojectPoints()">
+                </div>
+              </div>
+
+              <!-- Dimension Reduction Projections -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">Dimension Reduction</span>
+                <div class="algo-pill-container" style="margin-top: 8px;">
+                  <button class="algo-pill-btn active" id="btnProjPca" onclick="switchProjection('pca')">PCA</button>
+                  <button class="algo-pill-btn" id="btnProjTsne" onclick="switchProjection('tsne')">t-SNE</button>
+                  <button class="algo-pill-btn" id="btnProjUmap" onclick="switchProjection('umap')">UMAP</button>
+                </div>
+              </div>
+
+              <!-- Vector Space Visualization Toggle -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">Visual Mode</span>
+                <div class="algo-pill-container" style="margin-top: 8px;">
+                  <button class="algo-pill-btn active" id="btnToolbarPca" onclick="switchVisualMode('pca')">2D Space</button>
+                  <button class="algo-pill-btn" id="btnToolbarHnsw" onclick="switchVisualMode('hnsw')">HNSW Layer Graph</button>
+                </div>
+              </div>
+
+              <!-- Audio Resonant Synth Toggle -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">Resonant Audio Synth</span>
+                <div class="audio-control-row" style="margin-top: 8px;">
+                  <button class="btn-xs" id="toggleSoundBtn" onclick="toggleResonantSound()">
+                    <img src="audio_icon.png" class="btn-icon" id="soundIcon" alt="Audio" style="margin-right: 6px;" /><span id="soundText">Audio: Disabled</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Manual Ingest Node Form -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">Ingest Cluster Node</span>
+                <div class="form-group" style="margin-top: 8px;">
+                  <label class="control-label">Description</label>
+                  <input type="text" id="addMeta" placeholder="Content details..." />
+                  
+                  <label class="control-label" style="margin-top: 8px;">Category</label>
+                  <div class="select-container">
+                    <select id="addCat">
+                      <option value="cs">Computer Science</option>
+                      <option value="math">Mathematics</option>
+                      <option value="food">Food &amp; Cooking</option>
+                      <option value="sports">Sports &amp; Games</option>
+                    </select>
+                  </div>
+                  <button class="btn-g" onclick="addVector()" style="margin-top: 10px; width: 100%;">⚡ Ingest Node</button>
+                </div>
+              </div>
+
+              <!-- Vector Distance Resonance Sparklines -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">Vector Resonance Metrics</span>
+                
+                <div class="sparkline-row">
+                  <div class="sparkline-info">
+                    <span>Cosine Similarity</span>
+                    <span class="sparkline-val" id="cosineVal">0.000</span>
+                  </div>
+                  <canvas class="sparkline-cvs" id="cosineCvs" height="20"></canvas>
+                </div>
+                
+                <div class="sparkline-row">
+                  <div class="sparkline-info">
+                    <span>Euclidean Distance</span>
+                    <span class="sparkline-val" id="euclideanVal">0.000</span>
+                  </div>
+                  <canvas class="sparkline-cvs" id="euclideanCvs" height="20"></canvas>
+                </div>
+                
+                <div class="sparkline-row">
+                  <div class="sparkline-info">
+                    <span>Manhattan Distance</span>
+                    <span class="sparkline-val" id="manhattanVal">0.000</span>
+                  </div>
+                  <canvas class="sparkline-cvs" id="manhattanCvs" height="20"></canvas>
+                </div>
+              </div>
+
+              <!-- Latent Code Mapping Engine Legend -->
+              <div class="telemetry-card">
+                <span class="telemetry-title">Engine Legend</span>
+                <div class="legend-list">
+                  <div class="legend-item"><span class="leg-dot cs"></span>Computer Science</div>
+                  <div class="legend-item"><span class="leg-dot math"></span>Mathematics</div>
+                  <div class="legend-item"><span class="leg-dot food"></span>Food &amp; Cooking</div>
+                  <div class="legend-item"><span class="leg-dot sports"></span>Sports &amp; Games</div>
+                  <div class="legend-item"><span class="leg-dot doc"></span>Knowledge Document</div>
+                </div>
+              </div>
+
+            </aside>
+
+            <!-- Right Side: Canvas & Search Viewport -->
+            <section class="visualizer-canvas-panel">
+              
+              <!-- Search Probe Bar -->
+              <div class="visualizer-search-bar">
+                <div class="search-input-container">
+                  <input type="text" id="qInput" placeholder="Probe vector space (e.g. search term)..." />
+                  <button class="btn-clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Clear search">✕</button>
+                </div>
+                <button class="btn-search-probe" onclick="runSearch()"><i class="fa-solid fa-magnifying-glass"></i> Search Probe</button>
+              </div>
+
+              <!-- Main Interactive Canvas Viewport -->
+              <div class="canvas-viewport-container">
+                <div class="visualizer-wrapper" id="pcaWrapper">
+                  <canvas id="scatter"></canvas>
+                </div>
+
+                <div class="visualizer-wrapper" id="hnswNetworkWrapper" style="display: none;">
+                  <div id="hnswNetwork"></div>
+                </div>
+
+                <!-- HNSW Graph layers selector beautifully integrated overlay -->
+                <div class="hnsw-layer-selector" id="hnswLayerSelector" style="display: none;">
+                  <span class="layer-selector-label">HNSW Layer:</span>
+                  <div class="layer-pills" id="layerPillsContainer"></div>
+                </div>
+              </div>
+
+              <!-- HNSW Graph Layer Nodes Breakdown (hidden breakdown metrics) -->
+              <div id="layersBreakdown" style="display: none;"></div>
+
+              <!-- Top Nearest Neighbors Results Panel -->
+              <div class="telemetry-card results-telemetry">
+                <span class="telemetry-title">Nearest Neighbors</span>
+                <div class="results-container" id="results">
+                  <div class="empty-placeholder">Search probe vectors to visualize nearest matching neighbors...</div>
+                </div>
+              </div>
+
+            </section>
+          </div>
+        </div>
+
+        <!-- ── TAB 3: KNOWLEDGE DOCUMENTS (SIDE-BY-SIDE GRID) ── -->
+        <div class="tab-content" id="tab-docs">
+          <div class="docs-grid">
+            
+            <!-- Left Side: Ingestion Panel Column -->
+            <aside class="docs-ingestion-column">
+              <div class="docs-ingestion-card">
+                <h3 class="docs-card-title">Index Knowledge Document</h3>
+                <p class="docs-card-sub">Text files or articles are segmented, vectorized via local Ollama embeddings, and stored in the HNSW database.</p>
+                
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="control-label">Document Title</label>
+                  <input type="text" id="docTitle" placeholder="Document title (e.g. quantum-computing)..." />
+                  
+                  <label class="control-label" style="margin-top: 12px;">Content Body</label>
+                  <textarea id="docText" placeholder="Paste notes, articles, or reports here..."></textarea>
+                  
+                  <!-- File Drag and Drop Zone -->
+                  <div class="file-drop-zone" id="fileDropZone">
+                    <input type="file" id="fileInput" accept=".txt,.md" style="display: none;" />
+                    <div class="drop-zone-text">
+                      <span class="drop-icon">📂</span>
+                      <span class="drop-msg">Drag &amp; Drop <b>.txt</b> or <b>.md</b> file here</span>
+                    </div>
+                  </div>
+
+                  <button class="btn-g" id="insertDocBtn" onclick="insertDocument()" style="margin-top: 14px;">⚡ Embed &amp; Index Document</button>
+                  <div class="status-text" id="insertStatus"></div>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Right Side: Document List Grid Column -->
+            <section class="docs-list-column">
+              <div class="docs-list-card">
+                <h3 class="docs-card-title">Active Knowledge Fragments (<span id="docCountLabel">0</span>)</h3>
+                <div class="doc-list-container" id="docList">
+                  <div class="empty-placeholder">No documents indexed.</div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Dynamic Tooltip -->
+  <div id="tip"></div>
+
+  <!-- Load script logic -->
+  <script src="app.js?v=18"></script>
+</body>
+</html>
