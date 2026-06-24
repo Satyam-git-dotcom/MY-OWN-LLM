@@ -45,15 +45,15 @@ let selectedHnswLayer = 0;
 let hnswInfoData = null;
 let visNetworkInstance = null;
 
-// Clemens Wenger 'Vectorial Resonance' States
+// 'Vectorial Resonance' States
 let activeProjection = 'pca'; // 'pca', 'tsne', or 'umap'
 let soundEnabled = false;
 let audioCtx = null;
 let particles = [];
 let sparklineWaves = {
-  cosine: new Array(55).fill(0.5),
-  euclidean: new Array(55).fill(0.5),
-  manhattan: new Array(55).fill(0.5)
+  cosine: new Array(55).fill(0.0001),
+  euclidean: new Array(55).fill(0.0001),
+  manhattan: new Array(55).fill(0.0001)
 };
 
 // ── PCA POWER ITERATION DIMENSIONALITY REDUCTION ──
@@ -145,6 +145,7 @@ const ctx = sc.getContext('2d');
 let bounds = { minX: -1, maxX: 1, minY: -1, maxY: 1 };
 
 function resize() {
+  if (!sc || !sc.parentElement) return;
   const r = sc.parentElement.getBoundingClientRect();
   sc.width = r.width;
   sc.height = r.height;
@@ -153,14 +154,14 @@ window.addEventListener('resize', resize);
 
 function w2c(wx, wy) {
   const P = 120; // Expanded padding for full screen layout
-  const W = sc.width;
-  const H = sc.height;
+  const W = sc.width || 800;
+  const H = sc.height || 600;
   const rx = bounds.maxX - bounds.minX || 1;
   const ry = bounds.maxY - bounds.minY || 1;
   return [P + ((wx - bounds.minX) / rx) * (W - 2 * P), H - P - ((wy - bounds.minY) / ry) * (H - 2 * P)];
 }
 
-// ── PARTICLE SWARM PHYSICS (Inspired by Physics of Beauty) ──
+// ── PARTICLE SWARM PHYSICS ──
 function initParticles() {
   particles = [];
   const count = 350; // Majestic dust trail
@@ -176,7 +177,7 @@ function initParticles() {
   }
 }
 
-// ── POLYPHONIC RESONANT SYNTHESIZER (Web Audio API) ──
+// ── POLYPHONIC RESONANT SYNTHESIZER ──
 function toggleResonantSound() {
   soundEnabled = !soundEnabled;
   const btn = document.getElementById('toggleSoundBtn');
@@ -186,9 +187,7 @@ function toggleResonantSound() {
   
   if (soundEnabled) {
     text.textContent = 'Audio: Enabled';
-    btn.style.color = 'var(--accent-black)';
-    btn.style.background = 'var(--accent-white)';
-    btn.style.borderColor = 'var(--accent-white)';
+    btn.className = "btn-xs border border-primary p-xs text-background bg-primary font-label-mono text-[10px] flex items-center outline-none";
     
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -207,9 +206,7 @@ function toggleResonantSound() {
     }
   } else {
     text.textContent = 'Audio: Disabled';
-    btn.style.color = 'var(--text-muted)';
-    btn.style.background = 'transparent';
-    btn.style.borderColor = 'var(--border)';
+    btn.className = "btn-xs border border-outline-variant/30 p-xs text-on-surface-variant font-label-mono text-[10px] bg-transparent hover:border-white transition-all flex items-center outline-none";
   }
 }
 
@@ -298,15 +295,15 @@ function drawSparkline(cvsId, data, color) {
   vx.fill();
 }
 
-function updateParticleBounds() {} // Placeholder hook for slider
+function updateParticleBounds() {}
 
 function drawFrame() {
-  if (activeVisualMode === 'pca') {
+  if (activeVisualMode === 'pca' && sc) {
     ctx.clearRect(0, 0, sc.width, sc.height);
     ctx.fillStyle = '#0a0a0a'; // Pitch black background
     ctx.fillRect(0, 0, sc.width, sc.height);
     
-    // Draw Grid Coordinates ("Latent Dimensions")
+    // Draw Grid Coordinates
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
     ctx.lineWidth = 1.0;
     for (let i = 1; i <= 7; i++) {
@@ -316,7 +313,7 @@ function drawFrame() {
       ctx.beginPath(); ctx.moveTo(0, ty); ctx.lineTo(sc.width, ty); ctx.stroke();
     }
     
-    // Axis legends (inspired by Clemens Wenger design layout)
+    // Axis legends
     ctx.fillStyle = '#ffffff';
     ctx.font = '600 11.5px Space Grotesk, sans-serif';
     ctx.fillText('Latent Dimension 1 (PC₁ / ProjX)', sc.width / 2 - 90, sc.height - 24);
@@ -343,7 +340,6 @@ function drawFrame() {
         const [nx, ny] = w2c(node.x, node.y);
         
         p.angle += p.speed;
-        // Particle bounds scaling
         const radius = p.radius * threshold * 1.8;
         const px = nx + Math.cos(p.angle) * radius;
         const py = ny + Math.sin(p.angle) * radius;
@@ -358,21 +354,19 @@ function drawFrame() {
       ctx.globalAlpha = 1.0;
     }
     
-    // Draw organic curving Bezier link from Query Probe
+    // Draw Bezier linking curves from Query Probe
     if (queryPt && hitIds.size > 0) {
       const [qx, qy] = w2c(queryPt.x, queryPt.y);
       for (const pt of pcaPoints) {
         if (!hitIds.has(pt.item.id)) continue;
         const [px, py] = w2c(pt.x, pt.y);
         
-        // Fluid, organic Bezier curves (not straight lines)
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 1.2;
         ctx.setLineDash([3, 5]);
         ctx.beginPath();
         ctx.moveTo(qx, qy);
         
-        // Smooth organic S-curving control points
         const cx1 = qx + (px - qx) * 0.25 + Math.sin(pulse) * 12;
         const cy1 = qy + (py - qy) * 0.75 + Math.cos(pulse) * 12;
         ctx.quadraticCurveTo(cx1, cy1, px, py);
@@ -388,7 +382,7 @@ function drawFrame() {
       const isHit = hitIds.has(pt.item.id);
       const r = isHit ? 9 : 5.5;
       
-      // Orbit concentric geometric rings with neon glow
+      // Orbit concentric geometric rings
       if (isHit) {
         const pr = r + 9 + Math.sin(pulse * 1.8) * 4.5;
         ctx.save();
@@ -412,7 +406,7 @@ function drawFrame() {
       ctx.fill();
       ctx.restore();
       
-      // Hyper-glowing Core Dot (True neon shadow blur)
+      // Glowing Core Dot
       ctx.save();
       ctx.shadowColor = col;
       ctx.shadowBlur = isHit ? 18 : 10;
@@ -471,66 +465,65 @@ function drawFrame() {
 }
 
 // Hover/move event bindings
-sc.addEventListener('mousemove', e => {
-  if (activeVisualMode !== 'pca') return;
-  const rect = sc.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  
-  let oldHover = hoverItem;
-  hoverItem = null;
-  let best = 24;
-  for (const pt of pcaPoints) {
-    const [cx, cy] = w2c(pt.x, pt.y);
-    const d = Math.hypot(mx - cx, my - cy);
-    if (d < best) {
-      best = d;
-      hoverItem = pt.item;
-    }
-  }
-  
-  // Resonant Sound Synthesis trigger on hover transitions
-  if (hoverItem && (!oldHover || oldHover.id !== hoverItem.id)) {
-    // Map node category score index to frequency chime
-    let freq = 330; // default (E4)
-    if (hoverItem.category === 'cs') freq = 523.25; // C5
-    if (hoverItem.category === 'math') freq = 587.33; // D5
-    if (hoverItem.category === 'food') freq = 659.25; // E5
-    if (hoverItem.category === 'sports') freq = 783.99; // G5
-    if (hoverItem.category === 'doc') freq = 880.00; // A5
+if (sc) {
+  sc.addEventListener('mousemove', e => {
+    if (activeVisualMode !== 'pca') return;
+    const rect = sc.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
     
-    playChime(freq, 0.45, 0.35);
-  }
-  
-  const tip = document.getElementById('tip');
-  if (hoverItem) {
-    const col = COL[hoverItem.category] || COL.default;
-    tip.style.display = 'block';
-    tip.style.left = (e.clientX + 16) + 'px';
-    tip.style.top = (e.clientY - 12) + 'px';
-    tip.innerHTML = `<span style="font-weight:700;color:${col}">[${hoverItem.category.toUpperCase()}]</span><br>${hoverItem.metadata}`;
-  } else {
-    tip.style.display = 'none';
-  }
-});
+    let oldHover = hoverItem;
+    hoverItem = null;
+    let best = 24;
+    for (const pt of pcaPoints) {
+      const [cx, cy] = w2c(pt.x, pt.y);
+      const d = Math.hypot(mx - cx, my - cy);
+      if (d < best) {
+        best = d;
+        hoverItem = pt.item;
+      }
+    }
+    
+    if (hoverItem && (!oldHover || oldHover.id !== hoverItem.id)) {
+      let freq = 330;
+      if (hoverItem.category === 'cs') freq = 523.25;
+      if (hoverItem.category === 'math') freq = 587.33;
+      if (hoverItem.category === 'food') freq = 659.25;
+      if (hoverItem.category === 'sports') freq = 783.99;
+      if (hoverItem.category === 'doc') freq = 880.00;
+      
+      playChime(freq, 0.45, 0.35);
+    }
+    
+    const tip = document.getElementById('tip');
+    if (hoverItem && tip) {
+      const col = COL[hoverItem.category] || COL.default;
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 16) + 'px';
+      tip.style.top = (e.clientY - 12) + 'px';
+      tip.innerHTML = `<span style="font-weight:700;color:${col}">[${hoverItem.category.toUpperCase()}]</span><br>${hoverItem.metadata}`;
+    } else if (tip) {
+      tip.style.display = 'none';
+    }
+  });
 
-sc.addEventListener('mouseleave', () => {
-  hoverItem = null;
-  document.getElementById('tip').style.display = 'none';
-});
+  sc.addEventListener('mouseleave', () => {
+    hoverItem = null;
+    const tip = document.getElementById('tip');
+    if (tip) tip.style.display = 'none';
+  });
+}
 
 // ── INTERACTIVE VIS.JS HNSW GRAPH RENDERER ──
 function renderHnswNetwork(data, layer) {
   const container = document.getElementById('hnswNetwork');
-  if (!data) return;
+  if (!data || !container) return;
   
-  // Filter nodes & edges on this specific layer
   const filteredNodes = data.nodes.filter(n => n.maxLyr >= layer);
   const filteredEdges = data.edges.filter(e => e.lyr === layer);
   
   const isL = document.body.classList.contains('light-theme');
   
-  // Create vis.js datasets
   const nodes = new vis.DataSet(filteredNodes.map(n => {
     const col = COL[n.category] || COL.default;
     const isHit = hitIds.has(n.id);
@@ -586,32 +579,32 @@ function renderHnswNetwork(data, layer) {
   
   visNetworkInstance = new vis.Network(container, visData, options);
   
-  // Attach tooltip details on hover
   visNetworkInstance.on("hoverNode", function (params) {
     const nodeId = params.node;
     const nodeVal = data.nodes.find(n => n.id === nodeId);
     if (nodeVal) {
       const tip = document.getElementById('tip');
-      const col = COL[nodeVal.category] || COL.default;
-      tip.style.display = 'block';
-      tip.innerHTML = `<span style="font-weight:700;color:${col}">[${nodeVal.category.toUpperCase()}] ID: #${nodeVal.id}</span><br>${nodeVal.metadata}<br><span style="color:var(--text-muted)">Max Layer: L${nodeVal.maxLyr}</span>`;
-      
-      const domRect = container.getBoundingClientRect();
-      const pointer = visNetworkInstance.canvasToDOM(visNetworkInstance.getBody().nodes[nodeId]);
-      tip.style.left = (domRect.left + pointer.x + 18) + 'px';
-      tip.style.top = (domRect.top + pointer.y - 12) + 'px';
+      if (tip) {
+        const col = COL[nodeVal.category] || COL.default;
+        tip.style.display = 'block';
+        tip.innerHTML = `<span style="font-weight:700;color:${col}">[${nodeVal.category.toUpperCase()}] ID: #${nodeVal.id}</span><br>${nodeVal.metadata}<br><span style="color:var(--text-muted)">Max Layer: L${nodeVal.maxLyr}</span>`;
+        
+        const domRect = container.getBoundingClientRect();
+        const pointer = visNetworkInstance.canvasToDOM(visNetworkInstance.getBody().nodes[nodeId]);
+        tip.style.left = (domRect.left + pointer.x + 18) + 'px';
+        tip.style.top = (domRect.top + pointer.y - 12) + 'px';
+      }
     }
   });
   
   visNetworkInstance.on("blurNode", function () {
-    document.getElementById('tip').style.display = 'none';
+    const tip = document.getElementById('tip');
+    if (tip) tip.style.display = 'none';
   });
 }
 
-// Animate the search traversal path inside vis.js Network
 function animateHnswPath(path) {
   if (!visNetworkInstance || !path || path.length === 0) return;
-  
   let stepIdx = 0;
   
   function nextStep() {
@@ -620,7 +613,6 @@ function animateHnswPath(path) {
     const step = path[stepIdx];
     const edgeId = `edge-${Math.min(step.fromId, step.toId)}-${Math.max(step.fromId, step.toId)}-${step.layer}`;
     
-    // Highlight the transitioning nodes and linking edge
     try {
       if (visNetworkInstance.body.data.edges.get(edgeId)) {
         visNetworkInstance.body.data.edges.update({
@@ -630,7 +622,6 @@ function animateHnswPath(path) {
         });
       }
       
-      // Update destination node size and glowing border
       const toNode = visNetworkInstance.body.data.nodes.get(step.toId);
       if (toNode) {
         visNetworkInstance.body.data.nodes.update({
@@ -640,37 +631,32 @@ function animateHnswPath(path) {
         });
       }
       
-      // Focus on the active destination node with an offset
       visNetworkInstance.focus(step.toId, {
         scale: 1.25,
         animation: { duration: 350, easingFunction: 'easeInOutQuad' }
       });
     } catch (e) {
-      console.warn("Vis.js edge/node highlight error: " + e.getMessage());
+      console.warn("Vis.js edge highlight error: " + e);
     }
     
     stepIdx++;
-    setTimeout(nextStep, 500); // 500ms intervals between greedy jumps
+    setTimeout(nextStep, 500);
   }
   
-  // Clear any existing selections and highlight path
   setTimeout(nextStep, 400);
 }
 
-// ── LOADING DATA & DIAGNOSTICS ──
-// ── LOADING DATA & DIAGNOSTICS ──
+// ── PROJECTIONS & SCALES ──
 function switchProjection(proj) {
   activeProjection = proj;
-  
-  // Highlight active projection button on HUD
-  const pcas = ['ProjPca', 'ProjTsne', 'ProjUmap'];
+  const pcas = ['Pca', 'Tsne', 'Umap'];
   pcas.forEach(p => {
-    const btn = document.getElementById('btn' + p);
+    const btn = document.getElementById('btnProj' + p);
     if (btn) {
-      if (p.toLowerCase().endsWith(proj.toLowerCase())) {
-        btn.classList.add('active');
+      if (p.toLowerCase() === proj.toLowerCase()) {
+        btn.className = "p-xs border border-white font-label-mono text-[10px] text-primary outline-none";
       } else {
-        btn.classList.remove('active');
+        btn.className = "p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none";
       }
     }
   });
@@ -681,7 +667,6 @@ function switchProjection(proj) {
 function reprojectPoints() {
   if (allItems.length < 2) return;
   const pcaCoords = pca2D(allItems.map(v => v.embedding));
-  
   const density = parseFloat(document.getElementById('densitySlider')?.value || 0.6);
   
   pcaPoints = allItems.map((item, i) => {
@@ -689,13 +674,11 @@ function reprojectPoints() {
     let y = pcaCoords[i][1];
     
     if (activeProjection === 'tsne') {
-      // Simulate t-SNE concentric groups
       const r = Math.hypot(x, y);
       const theta = Math.atan2(y, x) + 0.65;
       x = r * Math.cos(theta) * 1.15 + Math.sin(y * 4) * 0.06;
       y = r * Math.sin(theta) * 1.15 + Math.cos(x * 4) * 0.06;
     } else if (activeProjection === 'umap') {
-      // Simulate UMAP polar manifold clusters
       const scale = 1.35;
       x = x * scale * density + (Math.sin(x * 3.5) * 0.09);
       y = y * scale * density + (Math.cos(y * 3.5) * 0.09);
@@ -703,7 +686,6 @@ function reprojectPoints() {
     return { x, y, item };
   });
   
-  // Recalculate bounds
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   for (const p of pcaPoints) {
     x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x);
@@ -730,24 +712,28 @@ async function loadHnswStats() {
     hnswInfoData = await r.json();
     
     const maxN = hnswInfoData.nodesPerLayer[0] || 1;
-    document.getElementById('layersBreakdown').innerHTML = hnswInfoData.nodesPerLayer.map((cnt, lyr) => {
-      const pct = Math.max((cnt / maxN) * 100, 2);
-      const edg = hnswInfoData.edgesPerLayer[lyr] || 0;
-      return `
-        <div class="hnsw-layer-stat-row">
-          <div class="hnsw-layer-name">L${lyr}</div>
-          <div class="hnsw-layer-bar-track">
-            <div class="hnsw-layer-bar-fill" style="width:${pct}%"></div>
-          </div>
-          <div class="hnsw-layer-counts">${cnt} nodes · ${edg} edges</div>
-        </div>`;
-    }).reverse().join('');
+    const breakdown = document.getElementById('layersBreakdown');
+    if (breakdown) {
+      breakdown.innerHTML = hnswInfoData.nodesPerLayer.map((cnt, lyr) => {
+        const pct = Math.max((cnt / maxN) * 100, 2);
+        const edg = hnswInfoData.edgesPerLayer[lyr] || 0;
+        return `
+          <div class="hnsw-layer-stat-row">
+            <div class="hnsw-layer-name">L${lyr}</div>
+            <div class="hnsw-layer-bar-track">
+              <div class="hnsw-layer-bar-fill" style="width:${pct}%"></div>
+            </div>
+            <div class="hnsw-layer-counts">${cnt} nodes · ${edg} edges</div>
+          </div>`;
+      }).reverse().join('');
+    }
     
-    // Populate layer pills for HNSW visualizer
     const pillsContainer = document.getElementById('layerPillsContainer');
-    pillsContainer.innerHTML = hnswInfoData.nodesPerLayer.map((cnt, lyr) => {
-      return `<div class="layer-pill ${lyr === selectedHnswLayer ? 'active' : ''}" onclick="selectHnswLayer(${lyr})">L${lyr}</div>`;
-    }).reverse().join('');
+    if (pillsContainer) {
+      pillsContainer.innerHTML = hnswInfoData.nodesPerLayer.map((cnt, lyr) => {
+        return `<div class="cursor-pointer px-sm py-[2px] font-label-mono text-[10px] ${lyr === selectedHnswLayer ? 'bg-primary text-background' : 'text-on-surface-variant hover:text-primary'}" onclick="selectHnswLayer(${lyr})">L${lyr}</div>`;
+      }).reverse().join('');
+    }
     
     if (activeVisualMode === 'hnsw') {
       renderHnswNetwork(hnswInfoData, selectedHnswLayer);
@@ -757,20 +743,23 @@ async function loadHnswStats() {
 
 function selectHnswLayer(layer) {
   selectedHnswLayer = layer;
-  document.querySelectorAll('.layer-pill').forEach((pill, idx) => {
-    // Reverse ordered indexing
-    const lyrIdx = hnswInfoData.nodesPerLayer.length - 1 - idx;
-    pill.classList.toggle('active', lyrIdx === layer);
-  });
   if (hnswInfoData) {
+    const pillsContainer = document.getElementById('layerPillsContainer');
+    if (pillsContainer) {
+      pillsContainer.innerHTML = hnswInfoData.nodesPerLayer.map((cnt, lyr) => {
+        return `<div class="cursor-pointer px-sm py-[2px] font-label-mono text-[10px] ${lyr === selectedHnswLayer ? 'bg-primary text-background' : 'text-on-surface-variant hover:text-primary'}" onclick="selectHnswLayer(${lyr})">L${lyr}</div>`;
+      }).reverse().join('');
+    }
     renderHnswNetwork(hnswInfoData, selectedHnswLayer);
   }
 }
 
 // ── SEARCH & BENCHMARKING ──
 function setAlgo(el) {
-  document.querySelectorAll('.algo-pill-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('.algo-pill-btn').forEach(btn => {
+    btn.className = "algo-pill-btn w-full flex items-center gap-sm p-xs text-on-surface-variant hover:bg-surface-container-low transition-colors transition-all duration-75 outline-none";
+  });
+  el.className = "algo-pill-btn w-full flex items-center gap-sm p-xs bg-surface-container-highest text-primary border-l-2 border-primary transition-all duration-75 outline-none";
   selAlgo = el.dataset.algo;
 }
 
@@ -783,30 +772,19 @@ async function runSearch() {
   if (!text) return;
   
   const emb = textToEmbedding(text);
-  const kSlider = document.getElementById('kSlider');
-  const k = kSlider ? parseInt(kSlider.value) : 5;
   const metric = document.getElementById('metric').value;
   
-  const url = `${API}/search?v=${emb.join(',')}&k=${k}&metric=${metric}&algo=${selAlgo}`;
+  const url = `${API}/search?v=${emb.join(',')}&k=5&metric=${metric}&algo=${selAlgo}`;
   try {
     const r = await fetch(url);
     const data = await r.json();
     
     searchResults = data.results || [];
     hitIds = new Set(searchResults.map(r => r.id));
-    const us = data.latencyUs || 0;
     
-    // Safe DOM updating for legacy elements
-    const latBig = document.getElementById('latBig');
-    if (latBig) latBig.textContent = us < 1000 ? us + ' μs' : (us / 1000).toFixed(2) + ' ms';
-    const latSub = document.getElementById('latSub');
-    if (latSub) latSub.textContent = `${selAlgo.toUpperCase()}  ·  ${metric.toUpperCase()}  ·  k=${k}`;
-    
-    // Resonant Audio synthesis chime strike on successful search
     playChime(660, 0.45, 0.45);
     setTimeout(() => playChime(880, 0.6, 0.45), 150);
     
-    // Calculate and push dynamic sparkline waves
     let cosDist = 0.95, eucDist = 0.12, manDist = 0.08;
     if (searchResults.length > 0) {
       const firstHit = searchResults[0];
@@ -842,11 +820,9 @@ async function runSearch() {
     }
     
     renderResults(searchResults);
-    drawVecChart(emb);
     
-    // If in HNSW network visual mode, reload layout and animate greedy path
     if (activeVisualMode === 'hnsw' && data.traversalPath && data.traversalPath.length > 0) {
-      await loadHnswStats(); // Update hit sizes first
+      await loadHnswStats();
       animateHnswPath(data.traversalPath);
     }
   } catch (_) {
@@ -854,15 +830,14 @@ async function runSearch() {
   }
 }
 
-document.getElementById('qInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') runSearch();
-});
-
 const qInput = document.getElementById('qInput');
-const clearSearchBtn = document.getElementById('clearSearchBtn');
-if (qInput && clearSearchBtn) {
+if (qInput) {
+  qInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') runSearch();
+  });
   qInput.addEventListener('input', () => {
-    clearSearchBtn.style.display = qInput.value.trim() ? 'flex' : 'none';
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (clearBtn) clearBtn.style.display = qInput.value.trim() ? 'flex' : 'none';
   });
 }
 
@@ -883,7 +858,7 @@ function clearSearch() {
   
   const resultsContainer = document.getElementById('results');
   if (resultsContainer) {
-    resultsContainer.innerHTML = '<div class="empty-placeholder">Search probe vectors to visualize nearest matching neighbors...</div>';
+    resultsContainer.innerHTML = '<div class="empty-placeholder text-[11px] font-label-mono text-outline">Search probe vectors to visualize nearest matching neighbors...</div>';
   }
   
   pushSparklineData(0.0001, 0.0001, 0.0001);
@@ -896,89 +871,27 @@ function clearSearch() {
 function renderResults(results) {
   const container = document.getElementById('results');
   if (!results || !results.length) {
-    container.innerHTML = '<div class="empty-placeholder">No matching nearest neighbors found.</div>';
+    container.innerHTML = '<div class="empty-placeholder text-[11px] font-label-mono text-outline">No matching nearest neighbors found.</div>';
     return;
   }
   
   container.innerHTML = results.map((r, i) => {
     const col = COL[r.category] || COL.default;
     return `
-      <div class="rcard" onmouseenter="hoverItem={id:${r.id}}" onmouseleave="hoverItem=null">
-        <div class="rrank">RANK #${i + 1} NEIGHBOR</div>
-        <div class="rmeta">${r.metadata}</div>
-        <div class="rfoot">
-          <span class="rcat cat-${r.category}">${r.category.toUpperCase()}</span>
-          <span class="rdist">dist: ${r.distance.toFixed(6)}</span>
-          <button class="btn-del" onclick="deleteItem(${r.id})">✕</button>
+      <div class="p-xs bg-surface-container-low border border-outline-variant/10 hover:border-white/20 transition-all cursor-pointer min-w-[200px] flex flex-col justify-between" onmouseenter="hoverItem={id:${r.id}}" onmouseleave="hoverItem=null">
+        <div>
+          <div class="flex justify-between items-start mb-xs">
+            <span class="font-label-mono text-[10px] text-primary font-bold">ID_${r.id}</span>
+            <span class="font-label-mono text-[10px] text-outline">DIST: ${r.distance.toFixed(4)}</span>
+          </div>
+          <p class="text-[11px] text-on-surface-variant line-clamp-2 mb-xs">${r.metadata}</p>
+        </div>
+        <div class="flex justify-between items-center mt-xs pt-xs border-t border-outline-variant/10">
+          <span class="text-[9px] px-1 border border-outline-variant/30 text-outline font-label-mono uppercase" style="color:${col}; border-color:${col}">${r.category}</span>
+          <button class="text-outline hover:text-white text-[10px]" onclick="deleteItem(${r.id})">✕</button>
         </div>
       </div>`;
   }).join('');
-}
-
-function drawVecChart(emb) {
-  const vc = document.getElementById('vecCvs');
-  if (!vc) return;
-  const W = vc.parentElement.clientWidth;
-  vc.width = W;
-  const vx = vc.getContext('2d');
-  
-  vx.clearRect(0, 0, W, 70);
-  vx.fillStyle = '#0a0a0a';
-  vx.fillRect(0, 0, W, 70);
-  
-  const bw = (W - 4) / DIMS;
-  for (let i = 0; i < DIMS; i++) {
-    const h = emb[i] * 50;
-    const x = 2 + i * bw;
-    const col = DIM_COL[i];
-    vx.shadowColor = col;
-    vx.shadowBlur = 0;
-    vx.fillStyle = col + 'aa';
-    vx.fillRect(x + 1, 55 - h, bw - 2, h);
-  }
-  
-  vx.shadowBlur = 0;
-  vx.font = '500 8px monospace';
-  vx.textAlign = 'center';
-  
-  [['CS', 0], ['MATH', 4], ['FOOD', 8], ['SPORT', 12]].forEach(([lbl, gi], i) => {
-    vx.fillStyle = Object.values(COL)[i] + 'aa';
-    vx.fillText(lbl, 2 + (gi + 1.5) * bw, 65);
-  });
-  vx.textAlign = 'left';
-}
-
-async function runBenchmark() {
-  const text = document.getElementById('qInput').value.trim() || 'binary tree search';
-  const emb = textToEmbedding(text);
-  const metric = document.getElementById('metric').value;
-  
-  try {
-    const r = await fetch(`${API}/benchmark?v=${emb.join(',')}&k=5&metric=${metric}`);
-    const d = await r.json();
-    
-    document.getElementById('benchSec').style.display = 'block';
-    const mx = Math.max(d.bruteforceUs, d.kdtreeUs, d.hnswUs, 1);
-    
-    document.getElementById('benchBars').innerHTML = [
-      { lbl: 'Brute Force Search', us: d.bruteforceUs, col: 'var(--red)' },
-      { lbl: 'KD-Tree Index', us: d.kdtreeUs, col: 'var(--cs)' },
-      { lbl: 'HNSW Graph (O(log N))', us: d.hnswUs, col: 'var(--accent)' },
-    ].map(({ lbl, us, col }) => {
-      const pct = Math.max((us / mx) * 100, 2);
-      const disp = us < 1000 ? us + ' μs' : (us / 1000).toFixed(2) + ' ms';
-      return `
-        <div class="bench-bar-group">
-          <div class="bench-bar-labels">
-            <span class="bench-bar-lbl" style="color:${col}">${lbl}</span>
-            <span class="bench-bar-val">${disp}</span>
-          </div>
-          <div class="bench-bar-track">
-            <div class="bench-bar-fill" style="width:${pct}%;background:${col}"></div>
-          </div>
-        </div>`;
-    }).join('');
-  } catch (_) {}
 }
 
 async function addVector() {
@@ -1010,7 +923,7 @@ async function deleteItem(id) {
   } catch (_) {}
 }
 
-// ── DOCUMENT INGESTION & DRAG AND DROP ──
+// ── DOCUMENT INGESTION & DIAGNOSTICS ──
 async function checkOllamaStatus() {
   try {
     const r = await fetch(API + '/status');
@@ -1020,79 +933,82 @@ async function checkOllamaStatus() {
     
     if (d.ollamaAvailable) {
       if (badge) {
-        badge.className = 'status-badge status-online';
-        badge.textContent = 'Ollama: Online';
+        badge.className = 'ml-auto text-[9px] px-1 border border-green-500/30 text-green-500 bg-green-500/5';
+        badge.textContent = 'Online';
       }
       if (card) {
-        card.className = 'ollama-status-card status-online';
         card.querySelector('.status-details').innerHTML = `
           ● Local AI Active<br>
-          Embed Model: <span style="color:var(--cs)">${d.embedModel}</span><br>
-          Llama Model: <span style="color:var(--math)">${d.genModel}</span><br>
-          Embedded Vectors: <span style="color:var(--text)">${d.docCount} items</span><br>
-          Embedding Dims: <span style="color:var(--gold)">${d.docDims || 'Dynamic'}</span>`;
+          Embed: <span class="text-primary font-bold">${d.embedModel}</span><br>
+          Llama: <span class="text-primary font-bold">${d.genModel}</span><br>
+          Docs: <span class="text-primary font-bold">${d.docCount} items</span>`;
       }
     } else {
       if (badge) {
-        badge.className = 'status-badge status-offline';
-        badge.textContent = 'Ollama: Offline';
+        badge.className = 'ml-auto text-[9px] px-1 border border-red-500/30 text-red-500 bg-red-500/5';
+        badge.textContent = 'Offline';
       }
       if (card) {
-        card.className = 'ollama-status-card status-offline';
         card.querySelector('.status-details').innerHTML = `
-          ● Local AI Offline<br><br>
-          To activate full RAG capabilities:<br>
-          1. Download from <u>ollama.com</u><br>
-          2. Run: <span style="color:var(--red)">ollama pull nomic-embed-text</span><br>
-          3. Run: <span style="color:var(--red)">ollama pull llama3.2</span>`;
+          ● Local AI Offline<br>
+          Run:<br>
+          <span style="color:var(--error-col)">ollama pull nomic-embed-text</span><br>
+          <span style="color:var(--error-col)">ollama pull llama3.2</span>`;
       }
     }
   } catch (_) {}
 }
 
-// Drag & Drop event bindings
+// Drag & Drop
 const dropZone = document.getElementById('fileDropZone');
 const fileInput = document.getElementById('fileInput');
 
-dropZone.addEventListener('click', () => fileInput.click());
+if (dropZone && fileInput) {
+  dropZone.addEventListener('click', () => fileInput.click());
 
-dropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  dropZone.classList.add('dragover');
-});
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--primary-col)';
+    dropZone.style.backgroundColor = 'rgba(255,255,255,0.03)';
+  });
 
-['dragleave', 'dragend'].forEach(evt => {
-  dropZone.addEventListener(evt, () => dropZone.classList.remove('dragover'));
-});
+  ['dragleave', 'dragend'].forEach(evt => {
+    dropZone.addEventListener(evt, () => {
+      dropZone.style.borderColor = 'transparent';
+      dropZone.style.backgroundColor = 'transparent';
+    });
+  });
 
-dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  const files = e.dataTransfer.files;
-  if (files.length > 0) {
-    handleInboundFile(files[0]);
-  }
-});
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'transparent';
+    dropZone.style.backgroundColor = 'transparent';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleInboundFile(files[0]);
+    }
+  });
 
-fileInput.addEventListener('change', (e) => {
-  if (e.target.files.length > 0) {
-    handleInboundFile(e.target.files[0]);
-  }
-});
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleInboundFile(e.target.files[0]);
+    }
+  });
+}
 
 function handleInboundFile(file) {
   const status = document.getElementById('insertStatus');
   if (!file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
-    status.innerHTML = '<span style="color:var(--red)">✗ Format unsupported. Only .txt or .md files.</span>';
+    status.innerHTML = '<span style="color:var(--error-col)">✗ Format unsupported. Only .txt or .md files.</span>';
     return;
   }
   
   const reader = new FileReader();
   reader.onload = function(e) {
     const textContent = e.target.result;
-    document.getElementById('docTitle').value = file.name.replace(/\.[^/.]+$/, ""); // Strip extension
+    document.getElementById('docTitle').value = file.name.replace(/\.[^/.]+$/, "");
     document.getElementById('docText').value = textContent;
-    status.innerHTML = `<span style="color:var(--green)">✓ Loaded ${file.name} successfully! Click Embed to index.</span>`;
+    status.innerHTML = `<span class="text-green-500">✓ Loaded ${file.name}! Click Embed to index.</span>`;
   };
   reader.readAsText(file);
 }
@@ -1110,7 +1026,7 @@ async function insertDocument() {
   
   btn.disabled = true;
   btn.textContent = 'Vectorizing & Segmenting...';
-  status.innerHTML = '<span style="color:var(--text-muted)">Generating vector coordinates via Ollama embeddings...</span>';
+  status.innerHTML = '<span class="text-outline">Generating vector coordinates via Ollama embeddings...</span>';
   
   try {
     const r = await fetch(API + '/doc/insert', {
@@ -1121,13 +1037,12 @@ async function insertDocument() {
     const d = await r.json();
     
     if (d.error) {
-      status.innerHTML = `<span style="color:var(--red)">✗ Ingestion failed: ${d.error}</span>`;
+      status.innerHTML = `<span style="color:var(--error-col)">✗ Ingestion failed: ${d.error}</span>`;
     } else {
-      status.innerHTML = `<span style="color:var(--green)">✓ Segmented into ${d.chunks} chunk(s) · Vector: ${d.dims}-D!</span>`;
+      status.innerHTML = `<span class="text-green-500">✓ Segmented into ${d.chunks} chunk(s) · Vector: ${d.dims}-D!</span>`;
       document.getElementById('docTitle').value = '';
       document.getElementById('docText').value = '';
       
-      // Seed a virtual 16D vector to map onto visual semantic canvas
       const emb16 = textToEmbedding(title + ' ' + text);
       await fetch(API + '/insert', {
         method: 'POST',
@@ -1141,10 +1056,10 @@ async function insertDocument() {
       checkOllamaStatus();
     }
   } catch (_) {
-    status.innerHTML = '<span style="color:var(--red)">✗ Network / Ingestion failure</span>';
+    status.innerHTML = '<span style="color:var(--error-col)">✗ Network / Ingestion failure</span>';
   }
   btn.disabled = false;
-  btn.textContent = '⚡ Embed & Index Chunks';
+  btn.textContent = '⚡ Embed & Index Document';
 }
 
 async function loadDocList() {
@@ -1155,17 +1070,30 @@ async function loadDocList() {
     
     const container = document.getElementById('docList');
     if (!docs.length) {
-      container.innerHTML = '<div class="empty-placeholder">No document segments indexed.</div>';
+      container.innerHTML = '<div class="empty-placeholder text-[11px] font-label-mono text-outline">No documents indexed.</div>';
       return;
     }
     
     container.innerHTML = docs.map(d => `
-      <div class="dcard">
-        <div class="dcard-title">${d.title}</div>
-        <div class="dcard-preview">${d.preview}</div>
-        <div class="dcard-foot">
-          <span class="dcard-words">${d.words} words</span>
-          <button class="btn-del" onclick="deleteDoc(${d.id})">✕</button>
+      <div class="clinical-border bg-surface-container-lowest p-md flex flex-col gap-md group hover:border-white/40 transition-colors">
+        <div class="flex justify-between items-start">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-label-mono text-outline">ID_${d.id}_VECTOR</span>
+            <h4 class="text-sm font-bold text-white uppercase truncate w-40">${d.title}</h4>
+          </div>
+          <button class="text-outline hover:text-white" onclick="deleteDoc(${d.id})">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+        <p class="text-xs text-on-surface-variant line-clamp-3 leading-relaxed">
+          ${d.preview}
+        </p>
+        <div class="flex justify-between items-center pt-sm border-t border-outline-variant/15">
+          <span class="text-[10px] font-label-mono text-outline uppercase">${d.words} Words</span>
+          <div class="flex items-center gap-xs">
+            <span class="text-[10px] font-label-mono text-white">EMBEDDED</span>
+            <div class="w-1.5 h-1.5 bg-white"></div>
+          </div>
         </div>
       </div>`).join('');
   } catch (_) {}
@@ -1179,13 +1107,16 @@ async function deleteDoc(id) {
   } catch (_) {}
 }
 
-// ── RAG ASK AI (CHATBOT INTERACTIVE TIMELINE) ──
-document.getElementById('ragQuestion').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault(); // Prevent standard newline
-    askAI();
-  }
-});
+// ── RAG ASK AI ──
+const ragQuestion = document.getElementById('ragQuestion');
+if (ragQuestion) {
+  ragQuestion.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      askAI();
+    }
+  });
+}
 
 async function askAI() {
   const question = document.getElementById('ragQuestion').value.trim();
@@ -1197,30 +1128,39 @@ async function askAI() {
   btn.style.opacity = '0.5';
   
   const history = document.getElementById('chatHistory');
-  history.innerHTML = ''; // Reset chat log
   
-  // Append question bubble
+  const welcome = history.querySelector('.chat-welcome-screen');
+  if (welcome) welcome.remove();
+  
   const qDiv = document.createElement('div');
-  qDiv.className = 'chat-q';
+  qDiv.className = 'flex flex-col items-end gap-xs max-w-[80%] ml-auto';
   qDiv.innerHTML = `
-    <div class="chat-message-inner">
-      <div class="chat-avatar">U</div>
-      <div class="chat-msg-body">
-        <div class="chat-msg-label">You</div>
-        <div class="chat-msg-text"></div>
-      </div>
-    </div>`;
-  qDiv.querySelector('.chat-msg-text').textContent = question;
+    <div class="flex items-center gap-xs text-outline font-label-mono text-[10px]">
+      USER_ID_09
+      <span class="material-symbols-outlined !text-[10px]">person</span>
+    </div>
+    <div class="bg-surface-container-high p-sm border border-outline-variant/20 text-on-surface font-body-md q-text"></div>`;
+  qDiv.querySelector('.q-text').textContent = question;
   history.appendChild(qDiv);
   
-  // Thinking telemetry indicator
   const thinkDiv = document.createElement('div');
-  thinkDiv.className = 'thinking';
-  thinkDiv.innerHTML = '<div class="spinner"></div>Segmenting query &amp; retrieving context chunks…';
+  thinkDiv.className = 'flex flex-col items-start gap-xs';
+  thinkDiv.innerHTML = `
+    <div class="flex items-center gap-xs text-primary font-label-mono text-[10px]">
+      <span class="material-symbols-outlined !text-[10px]" style="font-variation-settings: 'FILL' 1;">neurology</span>
+      SYNAPSE_NODE_01
+    </div>
+    <div class="flex items-center gap-sm">
+      <div class="text-on-surface font-body-md italic opacity-50">
+        Querying vector space...
+        <span class="cursor-block"></span>
+      </div>
+    </div>`;
   history.appendChild(thinkDiv);
   history.scrollTop = history.scrollHeight;
   
-  // Highlight PCA visualizer in background
+  const startTs = Date.now();
+  
   fetch(API + '/doc/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1244,7 +1184,6 @@ async function askAI() {
         queryPt = { x: sx / sw + (Math.random() - 0.5) * 0.015, y: sy / sw + (Math.random() - 0.5) * 0.015 };
       }
     } else {
-      // Fallback star projection on query keywords 16-D
       hitIds = new Set();
       const emb16 = textToEmbedding(question);
       fetch(`${API}/search?v=${emb16.join(',')}&k=3&metric=cosine&algo=hnsw`)
@@ -1277,46 +1216,48 @@ async function askAI() {
     const d = await r.json();
     thinkDiv.remove();
     
+    const latMs = Date.now() - startTs;
+    document.getElementById('latencyIndicator').textContent = `${latMs}ms`;
+    
     const aDiv = document.createElement('div');
-    aDiv.className = 'chat-a';
+    aDiv.className = 'flex flex-col items-start gap-xs max-w-[85%]';
     
     if (d.error) {
       const isOllamaOffline = d.error.toLowerCase().includes("ollama");
       const errMsg = isOllamaOffline 
-        ? `Ollama server is currently offline.\n\nTo enable full local AI capabilities:\n1. Download and install Ollama from **https://ollama.com**\n2. Open your terminal and run:\n   \`ollama pull nomic-embed-text\`\n   \`ollama pull llama3.2\`\n3. Launch the Ollama application and refresh this page!`
+        ? `Ollama server is currently offline.\n\nTo enable full local AI capabilities:\n1. Download and install Ollama from https://ollama.com\n2. Open your terminal and run:\n   ollama pull nomic-embed-text\n   ollama pull llama3.2\n3. Launch the Ollama application and refresh this page!`
         : d.error;
       
       aDiv.innerHTML = `
-        <div class="chat-message-inner">
-          <div class="chat-avatar">
-            <img src="robot_icon.png" class="chat-avatar-img" alt="AI" />
-          </div>
-          <div class="chat-msg-body">
-            <div class="chat-msg-label">System</div>
-            <div class="chat-msg-text" style="color:var(--red); white-space:pre-wrap;">${errMsg}</div>
-          </div>
-        </div>`;
+        <div class="flex items-center gap-xs text-primary font-label-mono text-[10px]">
+          <span class="material-symbols-outlined !text-[10px]" style="font-variation-settings: 'FILL' 1;">neurology</span>
+          SYSTEM_ALERT
+        </div>
+        <div class="bg-surface-container-lowest p-sm border border-outline-variant/40 text-on-surface font-body-md relative" style="color:var(--error-col); white-space:pre-wrap;">${errMsg}</div>`;
       history.appendChild(aDiv);
     } else {
       aDiv.innerHTML = `
-        <div class="chat-message-inner">
-          <div class="chat-avatar">
-            <img src="robot_icon.png" class="chat-avatar-img" alt="AI" />
-          </div>
-          <div class="chat-msg-body">
-            <div class="chat-msg-label">${d.model || 'Local Model'}</div>
-            <div class="chat-msg-text" id="typeTarget"></div>
-            <div class="chat-ctx">
-              <div class="chat-ctx-label">Retrieved Context References (${d.contexts.length} chunks)</div>
-              ${d.contexts.map((c, i) => `
-                <span class="ctx-chip" onclick="toggleCtx(${i})">#${i + 1} ${c.title} (dist: ${c.distance.toFixed(3)})</span>
-                <div class="ctx-expand" id="ctx-${i}">${c.text}</div>`).join('')}
-            </div>
+        <div class="flex items-center gap-xs text-primary font-label-mono text-[10px]">
+          <span class="material-symbols-outlined !text-[10px]" style="font-variation-settings: 'FILL' 1;">neurology</span>
+          ${d.model || 'Local Model'}
+        </div>
+        <div class="bg-surface-container-lowest p-sm border border-outline-variant/40 text-on-surface font-body-md relative">
+          <div class="mb-sm text-content" id="typeTarget"></div>
+          <div class="flex flex-wrap gap-xs mt-sm pt-sm border-t border-outline-variant/10">
+            ${d.contexts.map((c, i) => `
+              <div class="relative group">
+                <div class="flex items-center gap-xs px-xs py-[2px] bg-surface-container border border-outline-variant/20 text-outline font-label-mono text-[10px] cursor-pointer hover:border-primary transition-colors" onclick="toggleCtx(${i})">
+                  <span class="material-symbols-outlined !text-[12px]">description</span>
+                  #${i + 1} ${c.title} (dist: ${c.distance.toFixed(3)})
+                </div>
+                <div class="hidden absolute bottom-full left-0 mb-xs w-72 p-xs bg-surface-container-highest border border-outline-variant/30 text-on-surface text-[10px] z-50 rounded" id="ctx-${i}">
+                  ${c.text}
+                </div>
+              </div>`).join('')}
           </div>
         </div>`;
       history.appendChild(aDiv);
       
-      // RAG typewriter response stream
       const target = aDiv.querySelector('#typeTarget');
       target.classList.add('typing');
       const fullText = d.answer;
@@ -1336,23 +1277,20 @@ async function askAI() {
   } catch (e) {
     thinkDiv.remove();
     const err = document.createElement('div');
-    err.className = 'chat-a';
+    err.className = 'flex flex-col items-start gap-xs max-w-[85%]';
     err.innerHTML = `
-      <div class="chat-message-inner">
-        <div class="chat-avatar">
-          <img src="robot_icon.png" class="chat-avatar-img" alt="AI" />
-        </div>
-        <div class="chat-msg-body">
-          <div class="chat-msg-label">System</div>
-          <div class="chat-msg-text" style="color:var(--red)">
-            Unable to reach the Spring Boot backend. Please verify your server is running on port 8080!
-          </div>
-        </div>
+      <div class="flex items-center gap-xs text-primary font-label-mono text-[10px]">
+        <span class="material-symbols-outlined !text-[10px]" style="font-variation-settings: 'FILL' 1;">neurology</span>
+        SYSTEM_ALERT
+      </div>
+      <div class="bg-surface-container-lowest p-sm border border-outline-variant/40 text-on-surface font-body-md relative" style="color:var(--error-col)">
+        Unable to reach the Spring Boot backend. Please verify your server is running on port 8080!
       </div>`;
     history.appendChild(err);
   }
   
   document.getElementById('ragQuestion').value = '';
+  document.getElementById('ragQuestion').style.height = 'auto';
   btn.disabled = false;
   btn.style.opacity = '1';
   history.scrollTop = history.scrollHeight;
@@ -1360,18 +1298,32 @@ async function askAI() {
 
 function toggleCtx(i) {
   const el = document.getElementById('ctx-' + i);
-  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 
 // ── NAVIGATION & BOOT ──
 function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
-    const isCurrent = btn.id === 'tabBtn-' + name;
-    btn.classList.toggle('active', isCurrent);
+  const tabs = ['rag', 'visualizer', 'docs'];
+  tabs.forEach(t => {
+    const btn = document.getElementById('tabBtn-' + t);
+    const content = document.getElementById('tab-' + t);
+    if (btn) {
+      if (t === name) {
+        btn.className = "text-primary border-b border-primary pb-2 font-label-mono cursor-pointer outline-none";
+      } else {
+        btn.className = "text-on-surface-variant font-label-mono hover:text-primary transition-colors cursor-pointer outline-none";
+      }
+    }
+    if (content) {
+      if (t === name) {
+        content.classList.remove('hidden');
+        content.classList.add('flex');
+      } else {
+        content.classList.remove('flex');
+        content.classList.add('hidden');
+      }
+    }
   });
-  
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
   
   if (name === 'docs') loadDocList();
   if (name === 'visualizer') {
@@ -1380,18 +1332,35 @@ function switchTab(name) {
       if (activeVisualMode === 'hnsw' && visNetworkInstance) {
         visNetworkInstance.fit();
       }
-    }, 50); // Small timeout to allow DOM tab-active displays to register size bounds
+    }, 50);
   }
 }
 
 function switchVisualMode(mode) {
   activeVisualMode = mode;
   
-  // Highlight active vertical toolbar icons
   const pcaBtn = document.getElementById('btnToolbarPca');
   const hnswBtn = document.getElementById('btnToolbarHnsw');
-  if (pcaBtn) pcaBtn.classList.toggle('active', mode === 'pca');
-  if (hnswBtn) hnswBtn.classList.toggle('active', mode === 'hnsw');
+  
+  if (pcaBtn) {
+    if (mode === 'pca') {
+      pcaBtn.className = "p-xs border border-white font-label-mono text-[10px] text-primary outline-none";
+    } else {
+      pcaBtn.className = "p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none";
+    }
+  }
+  
+  if (mode === 'hnsw' && hnswInfoData) {
+    renderHnswNetwork(hnswInfoData, selectedHnswLayer);
+  }
+  
+  if (hnswBtn) {
+    if (mode === 'hnsw') {
+      hnswBtn.className = "p-xs border border-white font-label-mono text-[10px] text-primary outline-none";
+    } else {
+      hnswBtn.className = "p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none";
+    }
+  }
   
   document.getElementById('pcaWrapper').style.display = mode === 'pca' ? 'block' : 'none';
   document.getElementById('hnswNetworkWrapper').style.display = mode === 'hnsw' ? 'block' : 'none';
@@ -1402,35 +1371,6 @@ function switchVisualMode(mode) {
   }
   if (mode === 'hnsw' && hnswInfoData) {
     renderHnswNetwork(hnswInfoData, selectedHnswLayer);
-  }
-}
-
-// ── DRAWER INTERACTION TOGGLES ──
-function toggleDocsDrawer() {
-  const drawer = document.getElementById('docsDrawer');
-  if (!drawer) return;
-  drawer.classList.toggle('open');
-  const btn = document.getElementById('btnToolbarDocs');
-  if (btn) btn.classList.toggle('active', drawer.classList.contains('open'));
-  
-  // Close settings drawer if open
-  const setDrawer = document.getElementById('settingsDrawer');
-  if (setDrawer && setDrawer.classList.contains('open') && drawer.classList.contains('open')) {
-    toggleSettingsDrawer();
-  }
-}
-
-function toggleSettingsDrawer() {
-  const drawer = document.getElementById('settingsDrawer');
-  if (!drawer) return;
-  drawer.classList.toggle('open');
-  const btn = document.getElementById('btnToolbarSettings');
-  if (btn) btn.classList.toggle('active', drawer.classList.contains('open'));
-  
-  // Close docs drawer if open
-  const docDrawer = document.getElementById('docsDrawer');
-  if (docDrawer && docDrawer.classList.contains('open') && drawer.classList.contains('open')) {
-    toggleDocsDrawer();
   }
 }
 
@@ -1447,77 +1387,30 @@ function onMetricChange() {
   }
 }
 
-// Monochromatic Theme Toggle
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light-theme');
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  
-  if (isLight) {
-    COL.cs = '#0070f3';      // Vibrant Blue
-    COL.math = '#00a86b';    // Vibrant Green
-    COL.food = '#e67e22';    // Vibrant Orange
-    COL.sports = '#8e44ad';  // Vibrant Purple
-    COL.doc = '#e91e63';     // Vibrant Pink
-    COL.default = '#7f8c8d';
-    
-    // Update DIM_COL for Light theme
-    DIM_COL[0] = DIM_COL[1] = DIM_COL[2] = DIM_COL[3] = '#0070f3';
-    DIM_COL[4] = DIM_COL[5] = DIM_COL[6] = DIM_COL[7] = '#00a86b';
-    DIM_COL[8] = DIM_COL[9] = DIM_COL[10] = DIM_COL[11] = '#e67e22';
-    DIM_COL[12] = DIM_COL[13] = DIM_COL[14] = DIM_COL[15] = '#8e44ad';
-  } else {
-    COL.cs = '#00f3ff';      // Electric Cyan
-    COL.math = '#00ff88';    // Neon Green
-    COL.food = '#ff9f00';    // Neon Orange
-    COL.sports = '#d600ff';  // Neon Magenta
-    COL.doc = '#ff0077';     // Neon Coral/Rose
-    COL.default = '#a0a0a0';
-    
-    // Update DIM_COL for Dark theme
-    DIM_COL[0] = DIM_COL[1] = DIM_COL[2] = DIM_COL[3] = '#00f3ff';
-    DIM_COL[4] = DIM_COL[5] = DIM_COL[6] = DIM_COL[7] = '#00ff88';
-    DIM_COL[8] = DIM_COL[9] = DIM_COL[10] = DIM_COL[11] = '#ff9f00';
-    DIM_COL[12] = DIM_COL[13] = DIM_COL[14] = DIM_COL[15] = '#d600ff';
-  }
-  
-  // Re-render HNSW graph if in HNSW mode
-  if (activeVisualMode === 'hnsw' && hnswInfoData) {
-    renderHnswNetwork(hnswInfoData, selectedHnswLayer);
-  }
-}
+// Monochromatic Theme Toggle (Dark only, toggle option disabled)
+function toggleTheme() {}
 
 // Bootstrapping
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'light') {
-  document.body.classList.add('light-theme');
-  COL.cs = '#0070f3';
-  COL.math = '#00a86b';
-  COL.food = '#e67e22';
-  COL.sports = '#8e44ad';
-  COL.doc = '#e91e63';
-  COL.default = '#7f8c8d';
-  
-  DIM_COL[0] = DIM_COL[1] = DIM_COL[2] = DIM_COL[3] = '#0070f3';
-  DIM_COL[4] = DIM_COL[5] = DIM_COL[6] = DIM_COL[7] = '#00a86b';
-  DIM_COL[8] = DIM_COL[9] = DIM_COL[10] = DIM_COL[11] = '#e67e22';
-  DIM_COL[12] = DIM_COL[13] = DIM_COL[14] = DIM_COL[15] = '#8e44ad';
-} else {
-  COL.cs = '#00f3ff';
-  COL.math = '#00ff88';
-  COL.food = '#ff9f00';
-  COL.sports = '#d600ff';
-  COL.doc = '#ff0077';
-  COL.default = '#a0a0a0';
-  
-  DIM_COL[0] = DIM_COL[1] = DIM_COL[2] = DIM_COL[3] = '#00f3ff';
-  DIM_COL[4] = DIM_COL[5] = DIM_COL[6] = DIM_COL[7] = '#00ff88';
-  DIM_COL[8] = DIM_COL[9] = DIM_COL[10] = DIM_COL[11] = '#ff9f00';
-  DIM_COL[12] = DIM_COL[13] = DIM_COL[14] = DIM_COL[15] = '#d600ff';
-}
+localStorage.setItem('theme', 'dark');
+const htmlEl = document.documentElement;
+document.body.classList.remove('light-theme');
+htmlEl.classList.remove('light');
+htmlEl.classList.add('dark');
+
+COL.cs = '#00f3ff';
+COL.math = '#00ff88';
+COL.food = '#ff9f00';
+COL.sports = '#d600ff';
+COL.doc = '#ff0077';
+COL.default = '#a0a0a0';
+
+DIM_COL[0] = DIM_COL[1] = DIM_COL[2] = DIM_COL[3] = '#00f3ff';
+DIM_COL[4] = DIM_COL[5] = DIM_COL[6] = DIM_COL[7] = '#00ff88';
+DIM_COL[8] = DIM_COL[9] = DIM_COL[10] = DIM_COL[11] = '#ff9f00';
+DIM_COL[12] = DIM_COL[13] = DIM_COL[14] = DIM_COL[15] = '#d600ff';
 
 resize();
 drawFrame();
 loadItems().then(loadHnswStats);
 checkOllamaStatus();
-// Polling to keep track of Ollama status
 setInterval(checkOllamaStatus, 8000);

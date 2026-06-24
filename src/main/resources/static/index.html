@@ -1,353 +1,551 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Vectorial Resonance — Modern Minimalist AI Playground</title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>SYNAPSE / NEURAL VECTOR ENGINE</title>
   
-  <!-- Modern Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   
-  <!-- FontAwesome & Vis.js Network -->
+  <!-- Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Geist:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  
+  <!-- FontAwesome & Vis.js -->
   <script src="https://kit.fontawesome.com/4fe13466d5.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-  
-  <link rel="stylesheet" href="styles.css?v=18">
-</head>
-<body>
 
-  <div class="app-container">
-    
-    <!-- ══ LEFT SIDEBAR (PERMANENTLY VISIBLE) ══ -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo-area">
-          <img src="vector_brand_logo.png" class="logo-img" alt="Synapse Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px;" />
-          <div class="logo-text-block">
-            <h1>SYNAPSE</h1>
-            <span class="logo-subtitle">NEURAL VECTOR ENGINE</span>
-          </div>
+  <!-- Tailwind config matching color scales to CSS custom variables -->
+  <script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "background": "var(--bg-main)",
+                    "surface": "var(--bg-surface)",
+                    "surface-dim": "var(--bg-dim)",
+                    "surface-bright": "var(--bg-bright)",
+                    "surface-container-lowest": "var(--bg-lowest)",
+                    "surface-container-low": "var(--bg-low)",
+                    "surface-container": "var(--bg-container)",
+                    "surface-container-high": "var(--bg-high)",
+                    "surface-container-highest": "var(--bg-highest)",
+                    
+                    "on-surface": "var(--on-surface-col)",
+                    "on-surface-variant": "var(--on-surface-var-col)",
+                    "inverse-surface": "var(--inverse-surface-col)",
+                    "inverse-on-surface": "var(--inverse-on-surface-col)",
+                    
+                    "outline": "var(--outline-col)",
+                    "outline-variant": "var(--outline-variant-col)",
+                    "surface-tint": "var(--surface-tint-col)",
+                    
+                    "primary": "var(--primary-col)",
+                    "on-primary": "var(--on-primary-col)",
+                    "primary-container": "var(--primary-container-col)",
+                    "on-primary-container": "var(--on-primary-container-col)",
+                    "inverse-primary": "var(--inverse-primary-col)",
+                    
+                    "secondary": "var(--secondary-col)",
+                    "on-secondary": "var(--on-secondary-col)",
+                    "secondary-container": "var(--secondary-container-col)",
+                    "on-secondary-container": "var(--on-secondary-container-col)",
+                    
+                    "tertiary": "var(--tertiary-col)",
+                    "on-tertiary": "var(--on-tertiary-col)",
+                    "tertiary-container": "var(--tertiary-container-col)",
+                    "on-tertiary-container": "var(--on-tertiary-container-col)",
+                    
+                    "error": "var(--error-col)",
+                    "on-error": "var(--on-error-col)",
+                    "error-container": "var(--error-container-col)",
+                    "on-error-container": "var(--on-error-container-col)",
+                    
+                    "primary-fixed": "var(--primary-fixed-col)",
+                    "primary-fixed-dim": "var(--primary-fixed-dim-col)",
+                    "on-primary-fixed": "var(--on-primary-fixed-col)",
+                    "on-primary-fixed-variant": "var(--on-primary-fixed-variant-col)",
+                    
+                    "secondary-fixed": "var(--secondary-fixed-col)",
+                    "secondary-fixed-dim": "var(--secondary-fixed-dim-col)",
+                    "on-secondary-fixed": "var(--on-secondary-fixed-col)",
+                    "on-secondary-fixed-variant": "var(--on-secondary-fixed-variant-col)",
+                    
+                    "tertiary-fixed": "var(--tertiary-fixed-col)",
+                    "tertiary-fixed-dim": "var(--tertiary-fixed-dim-col)",
+                    "on-tertiary-fixed": "var(--on-tertiary-fixed-col)",
+                    "on-tertiary-fixed-variant": "var(--on-tertiary-fixed-variant-col)"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "9999px"
+                },
+                "spacing": {
+                    "md": "24px",
+                    "lg": "40px",
+                    "sm": "16px",
+                    "xs": "8px",
+                    "margin": "32px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "xl": "64px"
+                },
+                "fontFamily": {
+                    "label-mono": ["JetBrains Mono"],
+                    "headline-lg": ["Geist"],
+                    "body-lg": ["Geist"],
+                    "body-md": ["Geist"],
+                    "label-caps": ["Geist"],
+                    "headline-md": ["Geist"]
+                },
+                "fontSize": {
+                    "label-mono": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["11px", {"lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "500"}]
+                }
+            },
+        },
+    }
+  </script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="styles.css?v=18">
+
+  <style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        font-size: 18px;
+    }
+  </style>
+</head>
+<body class="font-body-md overflow-hidden h-screen flex flex-col">
+
+  <!-- TopNavBar -->
+  <header class="fixed top-0 w-full z-50 bg-background border-b border-outline-variant/15 flex justify-between items-center h-16 px-margin">
+    <div class="flex items-center gap-lg">
+      <span class="font-label-mono text-label-mono font-bold tracking-widest text-primary">SYNAPSE / NEURAL VECTOR ENGINE</span>
+      <nav class="hidden md:flex items-center gap-md">
+        <button id="tabBtn-rag" class="text-primary border-b border-primary pb-2 font-label-mono cursor-pointer outline-none" onclick="switchTab('rag')">Chatbot</button>
+        <button id="tabBtn-visualizer" class="text-on-surface-variant font-label-mono hover:text-primary transition-colors cursor-pointer outline-none" onclick="switchTab('visualizer')">Visualizer</button>
+        <button id="tabBtn-docs" class="text-on-surface-variant font-label-mono hover:text-primary transition-colors cursor-pointer outline-none" onclick="switchTab('docs')">Documents</button>
+      </nav>
+    </div>
+    <div class="flex items-center gap-md">
+
+      <div class="w-8 h-8 border border-outline-variant/30 flex items-center justify-center">
+        <span class="w-2 h-2 bg-green-500 rounded-full node-pulse"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <div class="flex flex-1 pt-16 h-full">
+
+    <!-- SideNavBar (Left - Persistent) -->
+    <aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-60 bg-surface-container-lowest border-r border-outline-variant/15 flex flex-col py-sm px-xs z-40">
+      <div class="mb-lg px-xs">
+        <p class="font-label-caps text-label-caps text-on-surface-variant mb-xs">ALGO_MODE</p>
+        <div class="flex items-center gap-xs">
+          <span class="material-symbols-outlined text-primary text-[14px]">sensors</span>
+          <span class="font-label-mono text-label-mono text-primary font-bold">Active Indexing</span>
         </div>
       </div>
       
-      <div class="sidebar-content">
-        <!-- Telemetry Stats Section -->
-        <div class="sidebar-section">
-          <span class="sec-title">Database Telemetry</span>
-          <div class="stats-label" id="statsLabel">0 vectors · 16 dims</div>
-        </div>
+      <!-- Algorithm Selection Pills -->
+      <div class="space-y-base flex-1">
+        <button id="btnIndexHnsw" data-algo="hnsw" onclick="setAlgo(this)" class="algo-pill-btn w-full flex items-center gap-sm p-xs bg-surface-container-highest text-primary border-l-2 border-primary transition-all duration-75 outline-none">
+          <span class="material-symbols-outlined">hub</span>
+          <span class="font-label-mono text-label-mono">HNSW</span>
+        </button>
+        <button id="btnIndexKdt" data-algo="kdtree" onclick="setAlgo(this)" class="algo-pill-btn w-full flex items-center gap-sm p-xs text-on-surface-variant hover:bg-surface-container-low transition-colors transition-all duration-75 outline-none">
+          <span class="material-symbols-outlined">account_tree</span>
+          <span class="font-label-mono text-label-mono">KD-Tree</span>
+        </button>
+        <button id="btnIndexBf" data-algo="bruteforce" onclick="setAlgo(this)" class="algo-pill-btn w-full flex items-center gap-sm p-xs text-on-surface-variant hover:bg-surface-container-low transition-colors transition-all duration-75 outline-none">
+          <span class="material-symbols-outlined">reorder</span>
+          <span class="font-label-mono text-label-mono">Brute Force</span>
+        </button>
+      </div>
 
-        <!-- Search Mode / Algorithm Select Section -->
-        <div class="sidebar-section">
-          <span class="sec-title">Search Mode</span>
-          <div class="algo-pill-container">
-            <button class="algo-pill-btn active" id="btnIndexHnsw" data-algo="hnsw" onclick="setAlgo(this)">HNSW</button>
-            <button class="algo-pill-btn" id="btnIndexKdt" data-algo="kdtree" onclick="setAlgo(this)">KD-Tree</button>
-            <button class="algo-pill-btn" id="btnIndexBf" data-algo="bruteforce" onclick="setAlgo(this)">Brute Force</button>
-          </div>
-        </div>
-
-        <!-- Distance Metric Section -->
-        <div class="sidebar-section">
-          <span class="sec-title">Distance Metric</span>
-          <div class="select-container">
-            <select id="metric" onchange="onMetricChange()">
-              <option value="cosine">Cosine Similarity</option>
-              <option value="euclidean">Euclidean Distance</option>
-              <option value="manhattan">Manhattan Distance</option>
-              <option value="chebyshev">Chebyshev Distance</option>
-              <option value="hamming">Hamming Distance</option>
-            </select>
-          </div>
+      <!-- Distance Metric Section -->
+      <div class="px-xs mb-sm">
+        <p class="font-label-caps text-label-caps text-on-surface-variant mb-xs">DISTANCE_METRIC</p>
+        <div class="select-container w-full bg-black border border-outline-variant/30 font-label-mono text-label-mono text-[11px] p-1.5">
+          <select id="metric" onchange="onMetricChange()" class="w-full bg-transparent border-none text-on-surface focus:ring-0 p-0 text-[11px] outline-none">
+            <option value="cosine">Cosine Similarity</option>
+            <option value="euclidean">Euclidean Distance</option>
+            <option value="manhattan">Manhattan Distance</option>
+            <option value="chebyshev">Chebyshev Distance</option>
+            <option value="hamming">Hamming Distance</option>
+          </select>
         </div>
       </div>
 
       <!-- Permanent Ollama Diagnostics Status -->
-      <div class="sidebar-footer">
-        <div class="ollama-status-card" id="ollamaStatusCard">
-          <div class="status-header">
-            <span class="status-indicator"></span>
-            <h3>Ollama Status</h3>
-            <span id="ollamaBadge" class="status-badge">Offline</span>
+      <div class="mt-auto space-y-base pt-sm border-t border-outline-variant/15 px-xs">
+        <div class="ollama-status-card p-xs bg-surface-container-low border border-outline-variant/10 text-on-surface-variant font-label-mono text-[10px]" id="ollamaStatusCard">
+          <div class="flex items-center gap-xs mb-1">
+            <span class="w-1.5 h-1.5 bg-green-500 rounded-full status-indicator"></span>
+            <span class="font-bold text-primary">Ollama</span>
+            <span id="ollamaBadge" class="ml-auto text-[9px] px-1 border border-outline-variant/30 text-outline">Checking...</span>
           </div>
-          <p class="status-details">Checking Ollama connection...</p>
+          <p class="status-details text-[9px] leading-tight text-on-surface-variant/80">Checking Ollama connection...</p>
+        </div>
+        <div class="text-on-surface-variant py-xs px-xs flex items-center gap-sm">
+          <span class="material-symbols-outlined !text-[16px]">database</span>
+          <span class="font-label-mono text-[10px]" id="statsLabel">0 vectors · 16 dims</span>
         </div>
       </div>
     </aside>
 
-    <!-- ══ MAIN INTERACTIVE PLAYGROUND (RIGHT PANEL) ══ -->
-    <main class="main-panel">
-      
-      <!-- Top Navigation Text-Based Bar -->
-      <nav class="top-nav">
-        <button class="tab-btn active" id="tabBtn-rag" onclick="switchTab('rag')">
-          <img src="chatbot_icon.png" class="tab-icon" alt="Chat" /> AI Chatbot
-        </button>
-        <button class="tab-btn" id="tabBtn-visualizer" onclick="switchTab('visualizer')">
-          <img src="visualizer_icon.png" class="tab-icon" alt="Visualizer" /> Vector Visualizer
-        </button>
-        <button class="tab-btn" id="tabBtn-docs" onclick="switchTab('docs')">
-          <img src="documents_icon.png" class="tab-icon" alt="Documents" /> Knowledge Documents
-        </button>
-        
-        <!-- Elegant Monochromatic Theme Toggle -->
-        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark Mode">
-          <img src="theme_icon.png" class="btn-icon" alt="Theme" style="margin-right: 6px;" />Theme
-        </button>
-      </nav>
+    <!-- Central Viewport (Swappable Tabs) -->
+    <main class="ml-60 h-[calc(100vh-64px)] flex-1 relative bg-background overflow-hidden flex flex-col">
 
-      <!-- Tab Content Area -->
-      <div class="tab-content-container">
-        
-        <!-- ── TAB 1: RAG CHATBOT ── -->
-        <div class="tab-content active" id="tab-rag">
-          <div class="chat-container">
-            <div class="chat-thread" id="chatHistory">
-              <div class="chat-welcome-screen">
-                <div class="welcome-avatar">
-                  <img src="robot_icon.png" class="welcome-avatar-img" alt="Robot Icon" />
-                </div>
-                <h2>Local Knowledge Chat</h2>
-                <p>Ask questions about your indexed documents. Context chunks will be retrieved semantic-first using HNSW vectors and summarized by Llama 3.2 locally.</p>
-              </div>
+      <!-- ── TAB 1: RAG CHATBOT ── -->
+      <div class="tab-content h-full flex flex-col" id="tab-rag">
+        <!-- Metrics Header -->
+        <div class="flex items-center justify-between px-lg h-14 border-b border-outline-variant/15 bg-surface-container-lowest/50 backdrop-blur-md">
+          <div class="flex gap-lg items-center">
+            <div class="flex flex-col">
+              <span class="text-outline text-[10px] font-label-caps leading-none">LATENCY</span>
+              <span class="font-label-mono text-primary" id="latencyIndicator">0.0ms</span>
             </div>
-
-            <!-- Chat Bottom Input Area -->
-            <div class="chat-input-wrapper">
-              <div class="chat-input-bar">
-                <textarea id="ragQuestion" placeholder="Ask a question about your documents... (Press Enter to send, Shift + Enter for new line)" rows="1" oninput="autoExpandTextarea(this)"></textarea>
-                <div class="chat-input-controls">
-                  <div class="select-container compact">
-                    <select id="ragK">
-                      <option value="2">Top-2 Chunks</option>
-                      <option value="3" selected>Top-3 Chunks</option>
-                      <option value="5">Top-5 Chunks</option>
-                    </select>
-                  </div>
-                  <button class="btn-chat-send" id="askBtn" onclick="askAI()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div class="chat-footer-msg">Your OWN AI · Monochromatic Minimal Gallery Theme · Local Ollama Integration</div>
+            <div class="w-px h-6 bg-outline-variant/20"></div>
+            <div class="flex flex-col">
+              <span class="text-outline text-[10px] font-label-caps leading-none">RECALL@10</span>
+              <span class="font-label-mono text-primary">0.982</span>
+            </div>
+            <div class="w-px h-6 bg-outline-variant/20"></div>
+            <div class="flex flex-col">
+              <span class="text-outline text-[10px] font-label-caps leading-none">DIMENSIONS</span>
+              <span class="font-label-mono text-primary">1536d</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-sm">
+            <div class="flex bg-surface-container border border-outline-variant/30 p-[2px]">
+              <button class="px-sm py-1 bg-primary text-background font-label-caps text-[10px]">VECTOR</button>
+              <button class="px-sm py-1 text-on-surface-variant font-label-caps text-[10px] hover:text-primary transition-colors">HYBRID</button>
             </div>
           </div>
         </div>
 
-        <!-- ── TAB 2: VECTOR VISUALIZER (SIDE-BY-SIDE GRID) ── -->
-        <div class="tab-content" id="tab-visualizer">
-          <div class="visualizer-grid">
-            
-            <!-- Left Side: Controls & Sliders Panel -->
-            <aside class="visualizer-sidebar">
-              
-              <!-- System Parameters -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">System Parameters</span>
-                
-                <div class="control-group">
-                  <div class="slider-header">
-                    <label class="control-label">Similarity Threshold</label>
-                    <span class="slider-val" id="thresholdLabel">0.35</span>
-                  </div>
-                  <input type="range" id="thresholdSlider" min="0.05" max="1" step="0.05" value="0.35" oninput="document.getElementById('thresholdLabel').textContent=this.value; updateParticleBounds()">
-                </div>
-
-                <div class="control-group">
-                  <div class="slider-header">
-                    <label class="control-label">Cluster Density</label>
-                    <span class="slider-val" id="densityLabel">0.60</span>
-                  </div>
-                  <input type="range" id="densitySlider" min="0.1" max="1.5" step="0.05" value="0.60" oninput="document.getElementById('densityLabel').textContent=this.value; reprojectPoints()">
-                </div>
-              </div>
-
-              <!-- Dimension Reduction Projections -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">Dimension Reduction</span>
-                <div class="algo-pill-container" style="margin-top: 8px;">
-                  <button class="algo-pill-btn active" id="btnProjPca" onclick="switchProjection('pca')">PCA</button>
-                  <button class="algo-pill-btn" id="btnProjTsne" onclick="switchProjection('tsne')">t-SNE</button>
-                  <button class="algo-pill-btn" id="btnProjUmap" onclick="switchProjection('umap')">UMAP</button>
-                </div>
-              </div>
-
-              <!-- Vector Space Visualization Toggle -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">Visual Mode</span>
-                <div class="algo-pill-container" style="margin-top: 8px;">
-                  <button class="algo-pill-btn active" id="btnToolbarPca" onclick="switchVisualMode('pca')">2D Space</button>
-                  <button class="algo-pill-btn" id="btnToolbarHnsw" onclick="switchVisualMode('hnsw')">HNSW Layer Graph</button>
-                </div>
-              </div>
-
-              <!-- Audio Resonant Synth Toggle -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">Resonant Audio Synth</span>
-                <div class="audio-control-row" style="margin-top: 8px;">
-                  <button class="btn-xs" id="toggleSoundBtn" onclick="toggleResonantSound()">
-                    <img src="audio_icon.png" class="btn-icon" id="soundIcon" alt="Audio" style="margin-right: 6px;" /><span id="soundText">Audio: Disabled</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Manual Ingest Node Form -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">Ingest Cluster Node</span>
-                <div class="form-group" style="margin-top: 8px;">
-                  <label class="control-label">Description</label>
-                  <input type="text" id="addMeta" placeholder="Content details..." />
-                  
-                  <label class="control-label" style="margin-top: 8px;">Category</label>
-                  <div class="select-container">
-                    <select id="addCat">
-                      <option value="cs">Computer Science</option>
-                      <option value="math">Mathematics</option>
-                      <option value="food">Food &amp; Cooking</option>
-                      <option value="sports">Sports &amp; Games</option>
-                    </select>
-                  </div>
-                  <button class="btn-g" onclick="addVector()" style="margin-top: 10px; width: 100%;">⚡ Ingest Node</button>
-                </div>
-              </div>
-
-              <!-- Vector Distance Resonance Sparklines -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">Vector Resonance Metrics</span>
-                
-                <div class="sparkline-row">
-                  <div class="sparkline-info">
-                    <span>Cosine Similarity</span>
-                    <span class="sparkline-val" id="cosineVal">0.000</span>
-                  </div>
-                  <canvas class="sparkline-cvs" id="cosineCvs" height="20"></canvas>
-                </div>
-                
-                <div class="sparkline-row">
-                  <div class="sparkline-info">
-                    <span>Euclidean Distance</span>
-                    <span class="sparkline-val" id="euclideanVal">0.000</span>
-                  </div>
-                  <canvas class="sparkline-cvs" id="euclideanCvs" height="20"></canvas>
-                </div>
-                
-                <div class="sparkline-row">
-                  <div class="sparkline-info">
-                    <span>Manhattan Distance</span>
-                    <span class="sparkline-val" id="manhattanVal">0.000</span>
-                  </div>
-                  <canvas class="sparkline-cvs" id="manhattanCvs" height="20"></canvas>
-                </div>
-              </div>
-
-              <!-- Latent Code Mapping Engine Legend -->
-              <div class="telemetry-card">
-                <span class="telemetry-title">Engine Legend</span>
-                <div class="legend-list">
-                  <div class="legend-item"><span class="leg-dot cs"></span>Computer Science</div>
-                  <div class="legend-item"><span class="leg-dot math"></span>Mathematics</div>
-                  <div class="legend-item"><span class="leg-dot food"></span>Food &amp; Cooking</div>
-                  <div class="legend-item"><span class="leg-dot sports"></span>Sports &amp; Games</div>
-                  <div class="legend-item"><span class="leg-dot doc"></span>Knowledge Document</div>
-                </div>
-              </div>
-
-            </aside>
-
-            <!-- Right Side: Canvas & Search Viewport -->
-            <section class="visualizer-canvas-panel">
-              
-              <!-- Search Probe Bar -->
-              <div class="visualizer-search-bar">
-                <div class="search-input-container">
-                  <input type="text" id="qInput" placeholder="Probe vector space (e.g. search term)..." />
-                  <button class="btn-clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Clear search">✕</button>
-                </div>
-                <button class="btn-search-probe" onclick="runSearch()"><i class="fa-solid fa-magnifying-glass"></i> Search Probe</button>
-              </div>
-
-              <!-- Main Interactive Canvas Viewport -->
-              <div class="canvas-viewport-container">
-                <div class="visualizer-wrapper" id="pcaWrapper">
-                  <canvas id="scatter"></canvas>
-                </div>
-
-                <div class="visualizer-wrapper" id="hnswNetworkWrapper" style="display: none;">
-                  <div id="hnswNetwork"></div>
-                </div>
-
-                <!-- HNSW Graph layers selector beautifully integrated overlay -->
-                <div class="hnsw-layer-selector" id="hnswLayerSelector" style="display: none;">
-                  <span class="layer-selector-label">HNSW Layer:</span>
-                  <div class="layer-pills" id="layerPillsContainer"></div>
-                </div>
-              </div>
-
-              <!-- HNSW Graph Layer Nodes Breakdown (hidden breakdown metrics) -->
-              <div id="layersBreakdown" style="display: none;"></div>
-
-              <!-- Top Nearest Neighbors Results Panel -->
-              <div class="telemetry-card results-telemetry">
-                <span class="telemetry-title">Nearest Neighbors</span>
-                <div class="results-container" id="results">
-                  <div class="empty-placeholder">Search probe vectors to visualize nearest matching neighbors...</div>
-                </div>
-              </div>
-
-            </section>
+        <!-- Chat Timeline -->
+        <div class="flex-grow overflow-y-auto px-lg py-md space-y-lg" id="chatHistory">
+          <div class="chat-welcome-screen flex flex-col items-center justify-center h-full text-center space-y-md py-lg">
+            <div class="welcome-avatar size-16 bg-surface-container flex items-center justify-center border border-outline-variant/30">
+              <img src="robot_icon.png" class="welcome-avatar-img w-10 h-10 btn-icon" alt="Robot Icon" />
+            </div>
+            <h2 class="text-lg font-semibold tracking-tighter uppercase text-primary">Local Knowledge Chat</h2>
+            <p class="text-xs text-on-surface-variant max-w-md">
+              Ask questions about your indexed documents. Context chunks will be retrieved semantic-first using HNSW vectors and summarized by Llama 3.2 locally.
+            </p>
           </div>
         </div>
 
-        <!-- ── TAB 3: KNOWLEDGE DOCUMENTS (SIDE-BY-SIDE GRID) ── -->
-        <div class="tab-content" id="tab-docs">
-          <div class="docs-grid">
-            
-            <!-- Left Side: Ingestion Panel Column -->
-            <aside class="docs-ingestion-column">
-              <div class="docs-ingestion-card">
-                <h3 class="docs-card-title">Index Knowledge Document</h3>
-                <p class="docs-card-sub">Text files or articles are segmented, vectorized via local Ollama embeddings, and stored in the HNSW database.</p>
-                
-                <div class="form-group" style="margin-top: 16px;">
-                  <label class="control-label">Document Title</label>
-                  <input type="text" id="docTitle" placeholder="Document title (e.g. quantum-computing)..." />
-                  
-                  <label class="control-label" style="margin-top: 12px;">Content Body</label>
-                  <textarea id="docText" placeholder="Paste notes, articles, or reports here..."></textarea>
-                  
-                  <!-- File Drag and Drop Zone -->
-                  <div class="file-drop-zone" id="fileDropZone">
-                    <input type="file" id="fileInput" accept=".txt,.md" style="display: none;" />
-                    <div class="drop-zone-text">
-                      <span class="drop-icon">📂</span>
-                      <span class="drop-msg">Drag &amp; Drop <b>.txt</b> or <b>.md</b> file here</span>
-                    </div>
-                  </div>
-
-                  <button class="btn-g" id="insertDocBtn" onclick="insertDocument()" style="margin-top: 14px;">⚡ Embed &amp; Index Document</button>
-                  <div class="status-text" id="insertStatus"></div>
+        <!-- Input Area -->
+        <div class="p-lg bg-surface-container-lowest border-t border-outline-variant/15">
+          <div class="max-w-5xl mx-auto space-y-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-md">
+                <div class="flex flex-col">
+                  <label class="text-outline text-[9px] font-label-caps mb-1">TOP-K RETRIEVAL</label>
+                  <input class="w-32 h-1 bg-surface-container-highest appearance-none cursor-pointer accent-primary" max="5" min="2" type="range" id="ragK" value="3" oninput="document.getElementById('kLabelVal').textContent=this.value"/>
                 </div>
+                <div class="text-primary font-label-mono text-[12px] pt-4" id="kLabelVal">3</div>
               </div>
-            </aside>
-
-            <!-- Right Side: Document List Grid Column -->
-            <section class="docs-list-column">
-              <div class="docs-list-card">
-                <h3 class="docs-card-title">Active Knowledge Fragments (<span id="docCountLabel">0</span>)</h3>
-                <div class="doc-list-container" id="docList">
-                  <div class="empty-placeholder">No documents indexed.</div>
-                </div>
+              <div class="flex items-center gap-xs">
+                <span class="text-outline text-[11px] font-label-mono">TOKEN_USAGE: DYNAMIC</span>
               </div>
-            </section>
-
+            </div>
+            <div class="relative flex items-end gap-xs bg-background border border-outline-variant/30 focus-within:border-primary transition-all p-xs">
+              <textarea id="ragQuestion" class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-body-md resize-none py-xs px-xs min-h-[48px] outline-none" placeholder="Submit complex vector operation or natural language query... (Press Enter to send, Shift + Enter for newline)" oninput="autoExpandTextarea(this)"></textarea>
+              <div class="flex flex-col gap-xs">
+                <button class="bg-primary text-background p-xs hover:bg-on-surface-variant transition-colors outline-none" id="askBtn" onclick="askAI()">
+                  <span class="material-symbols-outlined" style="font-variation-settings: 'wght' 700;">arrow_upward</span>
+                </button>
+              </div>
+            </div>
+            <div class="flex gap-sm overflow-x-auto pb-xs">
+              <button class="flex-shrink-0 px-sm py-1 border border-outline-variant/20 hover:border-primary text-outline hover:text-primary font-label-mono text-[10px] transition-all" onclick="document.getElementById('ragQuestion').value='/re-index --shard=04'; autoExpandTextarea(document.getElementById('ragQuestion'))">/re-index --shard=04</button>
+              <button class="flex-shrink-0 px-sm py-1 border border-outline-variant/20 hover:border-primary text-outline hover:text-primary font-label-mono text-[10px] transition-all" onclick="document.getElementById('ragQuestion').value='/similarity --metric=cosine'; autoExpandTextarea(document.getElementById('ragQuestion'))">/similarity --metric=cosine</button>
+            </div>
           </div>
         </div>
-
       </div>
+
+      <!-- ── TAB 2: VECTOR VISUALIZER ── -->
+      <div class="tab-content h-full hidden flex-row" id="tab-visualizer">
+        <div class="flex flex-row w-full h-full relative overflow-hidden">
+          
+          <!-- Left side controls sidebar -->
+          <aside class="w-80 h-full border-r border-outline-variant/15 flex flex-col bg-surface overflow-y-auto no-scrollbar">
+            <!-- Parameter controls -->
+            <section class="p-md border-b border-outline-variant/15 space-y-md">
+              <div>
+                <div class="flex justify-between text-label-mono font-label-mono text-[10px] mb-xs">
+                  <span>Similarity Threshold</span>
+                  <span class="text-primary" id="thresholdLabel">0.35</span>
+                </div>
+                <input class="w-full h-px bg-outline-variant/30 appearance-none cursor-pointer accent-white" max="1" min="0.05" step="0.05" type="range" id="thresholdSlider" value="0.35" oninput="document.getElementById('thresholdLabel').textContent=this.value; updateParticleBounds()"/>
+              </div>
+              <div>
+                <div class="flex justify-between text-label-mono font-label-mono text-[10px] mb-xs">
+                  <span>Cluster Density</span>
+                  <span class="text-primary" id="densityLabel">0.60</span>
+                </div>
+                <input class="w-full h-px bg-outline-variant/30 appearance-none cursor-pointer accent-white" max="1.5" min="0.1" step="0.05" type="range" id="densitySlider" value="0.60" oninput="document.getElementById('densityLabel').textContent=this.value; reprojectPoints()"/>
+              </div>
+            </section>
+
+            <!-- Projections & Modes -->
+            <section class="p-md border-b border-outline-variant/15 space-y-sm">
+              <div>
+                <p class="font-label-caps text-label-caps text-on-surface-variant mb-sm">DIMENSION_REDUCTION</p>
+                <div class="grid grid-cols-3 gap-base">
+                  <button class="p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none" id="btnProjPca" onclick="switchProjection('pca')">PCA</button>
+                  <button class="p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none" id="btnProjTsne" onclick="switchProjection('tsne')">t-SNE</button>
+                  <button class="p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none" id="btnProjUmap" onclick="switchProjection('umap')">UMAP</button>
+                </div>
+              </div>
+              <div class="pt-sm">
+                <p class="font-label-caps text-label-caps text-on-surface-variant mb-sm">VISUAL_MODE</p>
+                <div class="grid grid-cols-2 gap-base">
+                  <button class="p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none" id="btnToolbarPca" onclick="switchVisualMode('pca')">2D Space</button>
+                  <button class="p-xs border border-outline-variant/30 font-label-mono text-[10px] text-outline hover:border-white transition-colors outline-none" id="btnToolbarHnsw" onclick="switchVisualMode('hnsw')">HNSW Layer</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Audio control -->
+            <section class="p-md border-b border-outline-variant/15">
+              <div class="flex justify-between items-center bg-surface-container-low p-sm border border-outline-variant/15">
+                <span class="font-label-mono text-[11px] text-on-surface-variant uppercase tracking-widest">Audio Synthesis</span>
+                <button class="btn-xs border border-outline-variant/30 p-xs text-on-surface-variant font-label-mono text-[10px] bg-transparent hover:border-white transition-all flex items-center outline-none" id="toggleSoundBtn" onclick="toggleResonantSound()">
+                  <img src="audio_icon.png" class="btn-icon w-4 h-4 mr-1" id="soundIcon" alt="Audio" />
+                  <span id="soundText">Audio: Disabled</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- Manual Ingestion Form -->
+            <section class="p-md border-b border-outline-variant/15">
+              <p class="font-label-caps text-label-caps text-on-surface-variant mb-sm">INGEST_CLUSTER_NODE</p>
+              <div class="space-y-sm">
+                <div>
+                  <label class="font-label-mono text-[10px] text-outline mb-base block">METADATA_STRING</label>
+                  <input id="addMeta" class="w-full bg-black border border-outline-variant/30 font-label-mono text-label-mono p-xs focus:border-white focus:ring-0 outline-none" type="text" placeholder="Content details..."/>
+                </div>
+                <div>
+                  <label class="font-label-mono text-[10px] text-outline mb-base block">CATEGORY_TAG</label>
+                  <select id="addCat" class="w-full bg-black border border-outline-variant/30 font-label-mono text-label-mono p-xs focus:border-white focus:ring-0 outline-none">
+                    <option value="cs">Computer Science</option>
+                    <option value="math">Mathematics</option>
+                    <option value="food">Food &amp; Cooking</option>
+                    <option value="sports">Sports &amp; Games</option>
+                  </select>
+                </div>
+                <button class="w-full border border-white p-sm font-label-mono text-[11px] text-primary hover:bg-white hover:text-black transition-all outline-none" onclick="addVector()">
+                  COMMIT_TO_VECTOR_POOL
+                </button>
+              </div>
+            </section>
+
+            <!-- Vector Resonance Sparklines -->
+            <section class="p-md border-b border-outline-variant/15 space-y-md">
+              <p class="font-label-caps text-label-caps text-on-surface-variant mb-xs">VECTOR_RESONANCE_METRICS</p>
+              
+              <div class="space-y-sm">
+                <div class="flex justify-between items-center text-[10px] font-label-mono">
+                  <span class="text-outline uppercase">Cosine Similarity</span>
+                  <span class="text-primary" id="cosineVal">0.0000</span>
+                </div>
+                <canvas class="w-full h-5 bg-surface-container-lowest" id="cosineCvs" height="20"></canvas>
+              </div>
+              
+              <div class="space-y-sm">
+                <div class="flex justify-between items-center text-[10px] font-label-mono">
+                  <span class="text-outline uppercase">Euclidean Distance</span>
+                  <span class="text-primary" id="euclideanVal">0.0000</span>
+                </div>
+                <canvas class="w-full h-5 bg-surface-container-lowest" id="euclideanCvs" height="20"></canvas>
+              </div>
+              
+              <div class="space-y-sm">
+                <div class="flex justify-between items-center text-[10px] font-label-mono">
+                  <span class="text-outline uppercase">Manhattan Distance</span>
+                  <span class="text-primary" id="manhattanVal">0.0000</span>
+                </div>
+                <canvas class="w-full h-5 bg-surface-container-lowest" id="manhattanCvs" height="20"></canvas>
+              </div>
+            </section>
+
+            <!-- Legend -->
+            <section class="p-md">
+              <p class="font-label-caps text-label-caps text-on-surface-variant mb-sm">ENGINE_LEGEND</p>
+              <div class="space-y-xs text-[11px] font-label-mono text-outline">
+                <div class="flex items-center gap-xs"><span class="leg-dot cs"></span>Computer Science</div>
+                <div class="flex items-center gap-xs"><span class="leg-dot math"></span>Mathematics</div>
+                <div class="flex items-center gap-xs"><span class="leg-dot food"></span>Food &amp; Cooking</div>
+                <div class="flex items-center gap-xs"><span class="leg-dot sports"></span>Sports &amp; Games</div>
+                <div class="flex items-center gap-xs"><span class="leg-dot doc"></span>Knowledge Document</div>
+              </div>
+            </section>
+          </aside>
+
+          <!-- Right side main visualizer content -->
+          <section class="flex-1 flex flex-col h-full bg-surface-container-lowest relative overflow-hidden">
+            <div class="scanline"></div>
+            
+            <!-- Search Probe Bar -->
+            <div class="h-16 flex items-center border-b border-outline-variant/15 px-md bg-black/35 backdrop-blur-md justify-between">
+              <div class="relative flex items-center flex-1 max-w-xl">
+                <input id="qInput" class="w-full bg-surface-container-lowest border border-outline-variant/30 font-label-mono text-label-mono p-sm pr-10 focus:border-white focus:ring-0 transition-all outline-none" placeholder="QUERY_VECTOR_ID / SEARCH_TERM..." type="text"/>
+                <button class="absolute right-sm text-outline hover:text-white" id="clearSearchBtn" onclick="clearSearch()" style="display:none;">✕</button>
+              </div>
+              <button class="ml-md py-sm px-md border border-white font-label-mono text-[11px] text-primary hover:bg-white hover:text-black transition-all outline-none" onclick="runSearch()">SEARCH_PROBE</button>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="flex-1 relative bg-surface-container-lowest overflow-hidden">
+              <div class="absolute inset-0" id="pcaWrapper">
+                <canvas id="scatter" class="w-full h-full"></canvas>
+              </div>
+              <div class="absolute inset-0" id="hnswNetworkWrapper" style="display:none;">
+                <div id="hnswNetwork" class="w-full h-full"></div>
+              </div>
+              <div class="absolute top-md right-md flex bg-surface-container/85 backdrop-blur-md border border-outline-variant/20 p-xs gap-base items-center" id="hnswLayerSelector" style="display:none;">
+                <span class="font-label-mono text-[10px] text-outline px-xs">HNSW LAYER:</span>
+                <div class="flex gap-base" id="layerPillsContainer"></div>
+              </div>
+            </div>
+
+            <!-- HNSW Graph layers breakdown metrics (hidden but updated by script) -->
+            <div id="layersBreakdown" style="display:none;"></div>
+
+            <!-- Neighbors panel -->
+            <div class="border-t border-outline-variant/15 p-md bg-surface h-52 overflow-y-auto no-scrollbar">
+              <p class="font-label-caps text-label-caps text-on-surface-variant mb-sm">NEAREST_NEIGHBOR_SEARCH_RESULTS</p>
+              <div class="flex flex-row gap-sm overflow-x-auto" id="results">
+                <div class="empty-placeholder text-[11px] font-label-mono text-outline">Search probe vectors to visualize nearest matching neighbors...</div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- ── TAB 3: KNOWLEDGE DOCUMENTS ── -->
+      <div class="tab-content h-full hidden flex-row" id="tab-docs">
+        <div class="flex flex-row w-full h-full relative overflow-hidden">
+          
+          <!-- Ingestion Form (Left Column) -->
+          <aside class="w-96 h-full border-r border-outline-variant/15 flex flex-col p-md bg-surface overflow-y-auto no-scrollbar">
+            <div class="space-y-sm">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-primary">01 / Source Ingestion</h3>
+              <p class="text-[11px] text-on-surface-variant leading-relaxed mb-sm">
+                Text files or articles are segmented, vectorized via local Ollama embeddings, and stored in the HNSW database.
+              </p>
+              <div>
+                <label class="font-label-mono text-[10px] text-outline mb-base block">DOCUMENT TITLE</label>
+                <input id="docTitle" class="w-full bg-black border border-outline-variant/30 font-label-mono text-label-mono p-xs focus:border-white focus:ring-0 outline-none" type="text" placeholder="Document title (e.g. quantum-computing)..."/>
+              </div>
+              <div>
+                <label class="font-label-mono text-[10px] text-outline mb-base block">CONTENT BODY</label>
+                <textarea id="docText" class="w-full h-40 bg-black border border-outline-variant/30 font-label-mono text-label-mono p-xs focus:border-white focus:ring-0 outline-none" placeholder="Paste notes, articles, or reports here..."></textarea>
+              </div>
+              
+              <!-- Drag & Drop Zone -->
+              <div class="dotted-zone h-32 flex flex-col items-center justify-center gap-xs cursor-pointer border border-transparent hover:border-white transition-all" id="fileDropZone">
+                <input type="file" id="fileInput" accept=".txt,.md" style="display: none;" />
+                <span class="material-symbols-outlined text-[32px] text-outline">cloud_upload</span>
+                <div class="text-center">
+                  <p class="text-[11px] font-medium text-white uppercase tracking-wide">Drop Neural Map Files</p>
+                  <p class="text-[9px] text-outline mono-text mt-0.5">PDF | TXT | MD — MAX 50.0MB</p>
+                </div>
+              </div>
+
+              <button id="insertDocBtn" class="w-full border border-white py-sm font-label-mono text-[11px] text-primary hover:bg-white hover:text-black transition-all outline-none" onclick="insertDocument()">⚡ Embed &amp; Index Document</button>
+              <div class="text-[10px] font-label-mono text-outline mt-1" id="insertStatus"></div>
+            </div>
+          </aside>
+
+          <!-- Fragment Grid (Middle Column) -->
+          <section class="flex-grow flex flex-col p-md bg-surface-container-lowest overflow-y-auto no-scrollbar">
+            <div class="flex justify-between items-end border-b border-outline-variant/15 pb-xs mb-sm">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-on-secondary-container">02 / Indexed Knowledge Base (<span id="docCountLabel">0</span>)</h3>
+              <div class="flex gap-md text-[10px] mono-text text-outline">
+                <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">filter_list</span> FILTER: ALL_TIME</div>
+                <div class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">sort</span> SORT: RECENT</div>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md" id="docList">
+              <div class="empty-placeholder text-[11px] font-label-mono text-outline">No documents indexed.</div>
+            </div>
+          </section>
+
+          <!-- Telemetry Column (Right Side) -->
+          <aside class="w-80 h-full border-l border-outline-variant/15 flex flex-col bg-surface p-md overflow-y-auto no-scrollbar">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-on-secondary-container mb-md border-b border-outline-variant/15 pb-xs">System Telemetry</h3>
+            
+            <div class="space-y-lg flex-grow">
+              <div class="space-y-sm">
+                <div class="flex justify-between items-center text-[10px] font-label-mono">
+                  <span class="text-outline uppercase">CPU_UTILIZATION</span>
+                  <span class="text-white">24.2%</span>
+                </div>
+                <div class="w-full bg-surface-container h-1">
+                  <div class="bg-white h-full" style="width: 24.2%"></div>
+                </div>
+              </div>
+              <div class="space-y-sm">
+                <div class="flex justify-between items-center text-[10px] font-label-mono">
+                  <span class="text-outline uppercase">MEMORY_POOL_01</span>
+                  <span class="text-white">6.8 GB / 32 GB</span>
+                </div>
+                <div class="w-full bg-surface-container h-1">
+                  <div class="bg-white h-full" style="width: 21%"></div>
+                </div>
+              </div>
+              
+              <div class="pt-md border-t border-white/5 space-y-md">
+                <h4 class="text-[10px] font-bold uppercase text-outline tracking-widest">Active Background Tasks</h4>
+                <div class="space-y-sm">
+                  <div class="flex items-center gap-xs">
+                    <div class="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                    <span class="text-[9px] font-label-mono text-white">RE_INDEXING_LOCAL_CLUSTER_B</span>
+                  </div>
+                  <div class="flex items-center gap-xs opacity-50">
+                    <div class="w-1.5 h-1.5 bg-outline-col rounded-full"></div>
+                    <span class="text-[9px] font-label-mono text-outline">AUTO_SYNC_DEFERRED</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="h-44 w-full border border-outline-variant/20 relative overflow-hidden bg-black flex items-center justify-center">
+                <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle, var(--outline-col) 1px, transparent 1px); background-size: 10px 10px;"></div>
+                <span class="text-[9px] font-label-mono text-outline uppercase z-10">Neural Map Visualization</span>
+              </div>
+            </div>
+            
+            <div class="pt-sm border-t border-outline-variant/15 space-y-sm mt-auto">
+              <div class="flex justify-between text-[10px] font-label-mono text-outline">
+                <span>API_STATUS</span>
+                <span class="text-white uppercase">Operational</span>
+              </div>
+              <button class="w-full border border-outline-variant/30 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all outline-none">Export Vector Logs</button>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+
     </main>
 
   </div>
@@ -355,7 +553,7 @@
   <!-- Dynamic Tooltip -->
   <div id="tip"></div>
 
-  <!-- Load script logic -->
+  <!-- Client side Javascript app logic -->
   <script src="app.js?v=18"></script>
 </body>
 </html>
